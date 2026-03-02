@@ -92,6 +92,17 @@
 %========================================
 \section{第1讲：优化的边界（计算复杂性）}
 
+\begin{problem}[面试向 $\star\star$]
+\textbf{训练系统设计：为什么 AdamW 几乎是默认选项？}
+你在大厂面试中被问到：在百亿参数模型预训练里，为什么常用AdamW而不是SGD？
+\begin{subproblems}
+    \item 从优化几何角度比较 Adam 与 SGD 的更新差异（按坐标自适应步长、噪声鲁棒性）。
+    \item 解释为什么“解耦权重衰减”（AdamW）比把 $\lambda\|w\|^2$ 直接并入损失更稳定。
+    \item 给出一个你会在面试里说的超参起点（学习率、$\beta_1,\beta_2$、weight decay、warmup）。
+\end{subproblems}
+\end{problem}
+
+
 \begin{problem}[概念题 $\star$]
 请简述P类问题和NP类问题的定义，并解释"P $\subseteq$ NP"为什么成立。
 \end{problem}
@@ -235,6 +246,16 @@ S_1 = \{1,2,3\}, \quad S_2 = \{2,4\}, \quad S_3 = \{3,5\}, \quad S_4 = \{4,5,6\}
 
 %--- 第2讲 ---
 \section{第2讲：凸优化与KKT}
+
+\begin{problem}[面试向 $\star\star$]
+\textbf{约束优化问答：为什么要看KKT残差？}
+\begin{subproblems}
+    \item 对带不等式约束的优化问题，写出你会在面试里检查的4类KKT残差。
+    \item 若模型训练“loss 降了但约束违规”，你会如何定位是原始可行性问题还是对偶变量更新问题？
+    \item 在工程里如何把KKT残差作为 early stopping / 诊断指标？
+\end{subproblems}
+\end{problem}
+
 
 \begin{problem}[概念题 $\star$]
 给出凸集和凸函数的定义。证明：如果$f$是凸函数，则$f$的所有下水平集$\{x : f(x) \leq \alpha\}$是凸集。
@@ -461,6 +482,16 @@ $y_i$ & $+1$ & $+1$ & $+1$ & $-1$ & $-1$ & $-1$
 \end{problem}
 \section{第3讲：LP对偶与近似算法}
 
+\begin{problem}[面试向 $\star\star$]
+\textbf{LP松弛思维在模型压缩中的应用}
+\begin{subproblems}
+    \item 将“在精度下降不超过阈值下最小化参数量”抽象成一个组合优化问题，并说明LP松弛思路。
+    \item 面试中如何解释“松弛解 + 舍入”对可部署性的意义？
+    \item 给一个2-近似/常数近似在工程决策中的价值例子。
+\end{subproblems}
+\end{problem}
+
+
 \begin{problem}[概念题 $\star$]
 写出线性规划标准形及其对偶问题：
 \begin{subproblems}
@@ -606,6 +637,16 @@ c = \begin{pmatrix}1\\2\end{pmatrix}, \quad A = \begin{pmatrix}1&1\end{pmatrix},
 \end{problem}
 \section{第4讲：算法设计范式与GPU化}
 
+\begin{problem}[面试向 $\star\star$]
+\textbf{并行化面试题：Data Parallel 为什么仍会慢？}
+\begin{subproblems}
+    \item 写出一次训练step的时间分解：前向、反向、All-Reduce、优化器更新。
+    \item 在什么条件下“算力翻倍但吞吐不翻倍”？用通信/计算比解释。
+    \item 给出两种常见优化：梯度累积、重叠通信（overlap），并说明副作用。
+\end{subproblems}
+\end{problem}
+
+
 \begin{problem}[概念题 $\star$]
 分治法的三个步骤是什么？写出分治法的时间复杂度递推关系的一般形式$T(n) = aT(n/b) + f(n)$，并说明Master定理的三种情况。
 \end{problem}
@@ -745,6 +786,16 @@ $B \to A$: 容量 2  & $B \to t$: 容量 6
 \end{subproblems}
 \end{problem}
 \section{第5讲：梯度法与预条件}
+
+\begin{problem}[面试向 $\star\star$]
+\textbf{二阶信息实战：你会在什么时候用 L-BFGS？}
+\begin{subproblems}
+    \item 对比 SGD/Adam 与 L-BFGS 的适用场景（小样本微调、全批训练、数值优化子模块）。
+    \item 为什么 L-BFGS 在大规模深网预训练中不常用？从内存与随机噪声角度解释。
+    \item 给出“梯度爆炸/震荡”时你会先调的三个旋钮（lr、clip、precondition）。
+\end{subproblems}
+\end{problem}
+
 
 \begin{problem}[概念题 $\star$]
 写出梯度下降法的迭代公式，并解释为什么负梯度方向是局部最速下降方向。
@@ -965,6 +1016,16 @@ L-BFGS使用最近$m$步的$\{s_k, y_k\}$对近似$H^{-1}$，其中$s_k = x_{k+1
 \end{problem}
 \section{第6讲：流形优化}
 
+\begin{problem}[面试向 $\star\star$]
+\textbf{参数约束与流形：Norm-constraint 怎么做？}
+\begin{subproblems}
+    \item 若要求某层权重始终满足 $\|w\|_2=1$，说明“欧氏更新+投影”与“流形更新”的区别。
+    \item 在面试中如何解释“投影带来偏差但工程可用”？
+    \item 给出一个你见过的实际场景（检索向量、对比学习、归一化分类头）。
+\end{subproblems}
+\end{problem}
+
+
 \begin{problem}[概念题 $\star$]
 什么是光滑流形（smooth manifold）？直观地解释"局部像欧氏空间"的含义。列举三个在优化中常见的流形及其约束条件。
 \end{problem}
@@ -1065,6 +1126,16 @@ A = \begin{pmatrix} 3 & 1 & 0 \\ 1 & 2 & 1 \\ 0 & 1 & 1 \end{pmatrix}
 
 %--- 第7讲 ---
 \section{第7讲：随机化算法}
+
+\begin{problem}[面试向 $\star\star$]
+\textbf{随机化算法问答：为什么 Randomized SVD 在工业里常见？}
+\begin{subproblems}
+    \item 给出 Randomized SVD 的两阶段流程（随机投影 + 小矩阵分解）。
+    \item 对比精确SVD与随机SVD在时间/内存上的收益与误差来源。
+    \item 说明它在LoRA初始化、特征压缩或日志分析中的一个落地场景。
+\end{subproblems}
+\end{problem}
+
 
 \begin{problem}[概念题 $\star$]
 叙述Johnson-Lindenstrauss引理：对于$n$个点$x_1, \ldots, x_n \in \mathbb{R}^d$和$0 < \varepsilon < 1$，存在映射$f: \mathbb{R}^d \to \mathbb{R}^k$（$k = O(\log n / \varepsilon^2)$），使得对所有$i, j$：
@@ -1194,6 +1265,16 @@ A = \begin{pmatrix} 5 & 4 & 1 \\ 4 & 5 & 1 \\ 1 & 1 & 2 \end{pmatrix}
 \end{subproblems}
 \end{problem}
 \section{第8讲：随机优化}
+
+\begin{problem}[面试向 $\star\star$]
+\textbf{优化器对比：Adam、AdamW、Lion 怎么答？}
+\begin{subproblems}
+    \item 比较三者更新形式与隐式正则化差异。
+    \item 为什么很多大模型配方仍以 AdamW 为基线？
+    \item 设计一个公平A/B实验（固定token预算）比较三者最终验证集表现。
+\end{subproblems}
+\end{problem}
+
 
 \begin{problem}[概念题 $\star$]
 写出随机梯度下降（SGD）的更新公式，并证明SGD的梯度估计是无偏的：$\mathbb{E}[\nabla f_i(x)] = \nabla f(x)$，其中$f(x) = \frac{1}{n}\sum_{i=1}^n f_i(x)$。
@@ -1349,6 +1430,16 @@ L(\bm w)=\frac{1}{2B}\sum_{i=1}^B(\bm x_i^\top\bm w-y_i)^2.
 \end{problem}
 
 \section{第9讲：深度学习优化理论}
+
+\begin{problem}[面试向 $\star\star$]
+\textbf{大模型训练稳定性：NaN 排查题}
+\begin{subproblems}
+    \item 给出一套排查顺序：数据、损失缩放、学习率、梯度范数、激活统计。
+    \item 为什么 mixed precision 下更容易出现数值问题？
+    \item 面试里如何解释“bf16 通常比 fp16 更稳但并非总更快”？
+\end{subproblems}
+\end{problem}
+
 
 \begin{problem}[概念题 $\star$]
 解释"过参数化悖论"：为什么参数量远大于数据量的深度网络不会严重过拟合？经典学习理论对此有什么预测？实际情况如何？
@@ -1640,6 +1731,16 @@ Batch Normalization对每层的激活做归一化：$\hat{h}_j = (h_j - \mu_B)/\
 
 \section{第10讲：变分法与最优控制}
 
+\begin{problem}[面试向 $\star\star$]
+\textbf{控制视角面试题：学习率调度像什么控制器？}
+\begin{subproblems}
+    \item 将训练过程抽象成离散动力系统，说明学习率对稳定域的影响。
+    \item 解释 warmup + cosine decay 在控制角度的直观意义。
+    \item 设计一个“过冲/震荡”案例并给出调参方案。
+\end{subproblems}
+\end{problem}
+
+
 \begin{problem}[概念题 $\star$]
 什么是泛函（functional）？给出泛函的定义，并举两个优化泛函的经典例子。
 \end{problem}
@@ -1776,6 +1877,16 @@ p(z=k) = \pi_k, \quad p(x|z=k) = \mathcal{N}(x; \mu_k, 1)
 \end{subproblems}
 \end{problem}
 \section{第11讲：在线优化与Regret框架}
+
+\begin{problem}[面试向 $\star\star$]
+\textbf{在线优化题：A/B流量分配与Regret}
+\begin{subproblems}
+    \item 将多策略流量分配写成在线优化问题并给出 regret 定义。
+    \item 什么时候你会选 UCB，什么时候选 Thompson Sampling？
+    \item 若业务有延迟反馈（delayed reward），算法上怎么改？
+\end{subproblems}
+\end{problem}
+
 
 \begin{problem}[概念题 $\star$]
 描述在线学习（online learning）的基本框架：每轮做什么决策？收到什么反馈？目标是什么？
@@ -1969,6 +2080,16 @@ OGD更新：$\tilde{x}_{t+1} = x_t - \eta \nabla \ell_t(x_t)$，$x_{t+1} = \Pi_\
 \end{problem}
 \section{第12讲：MDP与Tabular RL理论}
 
+\begin{problem}[面试向 $\star\star$]
+\textbf{强化学习系统题：Value Iteration 如何工程加速？}
+\begin{subproblems}
+    \item 写出可并行的核心算子，并说明GPU实现瓶颈。
+    \item 对比同步与异步更新在收敛速度和工程复杂度上的差异。
+    \item 如果状态空间很大，你会如何做近似（函数逼近/采样备份）？
+\end{subproblems}
+\end{problem}
+
+
 \begin{problem}[概念题 $\star$]
 定义MDP的五元组$(S, A, P, R, \gamma)$，并分别解释每个元素的含义。写出有限时间（episodic）和无限时间（discounted）两种设定下的目标函数。
 \end{problem}
@@ -2130,6 +2251,16 @@ s_1 \xrightarrow{\text{右},r=-1} s_2 \xrightarrow{\text{右},r=-1} s_3 \xrighta
 \end{problem}
 \section{第13讲：深度RL与策略优化}
 
+\begin{problem}[面试向 $\star\star$]
+\textbf{策略梯度面试题：高方差怎么降？}
+\begin{subproblems}
+    \item 解释 baseline、advantage normalization、GAE 的作用机理。
+    \item 为什么“降方差可能引入偏差”？举一个例子。
+    \item 给出一个你在面试会说的 PPO 调参优先级列表。
+\end{subproblems}
+\end{problem}
+
+
 \begin{problem}[概念题 $\star$]
 解释DQN（Deep Q-Network）的核心思想：
 \begin{subproblems}
@@ -2263,6 +2394,16 @@ s_1 \xrightarrow{\text{右},r=-1} s_2 \xrightarrow{\text{右},r=-1} s_3 \xrighta
 \end{problem}
 \section{第14讲：PPO——约束优化的巅峰}
 
+\begin{problem}[面试向 $\star\star$]
+\textbf{PPO/RLHF：KL系数怎么调？}
+\begin{subproblems}
+    \item 说明固定KL惩罚与自适应KL惩罚的区别。
+    \item 当模型“奖励上升但人评下降”时，你如何解释并修复？
+    \item 给出一个离线日志中可监控的三元组指标（reward、KL、win-rate）。
+\end{subproblems}
+\end{problem}
+
+
 \begin{problem}[概念题 $\star$]
 PPO有两个变体：PPO-Penalty和PPO-Clip。分别写出它们的目标函数。
 \end{problem}
@@ -2394,6 +2535,16 @@ RLHF中，我们用PPO优化一个学习到的奖励模型$r_\phi(x,y)$（$x$是
 \end{problem}
 
 \section{第15讲：分布式优化}
+
+\begin{problem}[面试向 $\star\star$]
+\textbf{分布式训练面试题：All-Reduce 扩展性分析}
+\begin{subproblems}
+    \item 写出环形All-Reduce的通信复杂度，并解释弱扩展与强扩展差异。
+    \item 当节点数增加后吞吐下降，你会优先看哪些profiling指标？
+    \item 给出一个工程优化方案（ZeRO、梯度压缩、分层通信）并说明trade-off。
+\end{subproblems}
+\end{problem}
+
 
 \begin{problem}[概念题 $\star$]
 解释分布式优化中数据并行（Data Parallelism）和模型并行（Model Parallelism）的区别。各自适用于什么场景？
