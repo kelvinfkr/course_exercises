@@ -413,6 +413,52 @@ S_1 = \{1,2,3\}, \quad S_2 = \{2,4\}, \quad S_3 = \{3,5\}, \quad S_4 = \{4,5,6\}
 \end{problem}
 
 %--- 第3讲 ---
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{Markowitz投资组合完整推导}]
+三种资产，期望收益$\mu = (0.10, 0.15, 0.20)^\top$，协方差矩阵
+\[
+\Sigma = \begin{pmatrix} 0.04 & 0.006 & 0.002 \\ 0.006 & 0.09 & 0.018 \\ 0.002 & 0.018 & 0.16 \end{pmatrix}
+\]
+考虑$\min_w \frac{1}{2}w^\top \Sigma w$ \; s.t. $\mu^\top w \geq 0.15$, $\mathbf{1}^\top w = 1$, $w \geq 0$。
+\begin{subproblems}
+    \item 先忽略$w \geq 0$约束。写出仅含等式/不等式约束$\mu^\top w \geq 0.15$和$\mathbf{1}^\top w = 1$的Lagrangian $L(w,\lambda,\nu)$。
+    \item 对$w$求导令为零：$\Sigma w = \lambda \mu + \nu \mathbf{1}$，解得$w^* = \Sigma^{-1}(\lambda \mu + \nu \mathbf{1})$。先计算$\Sigma^{-1}$（手算$3\times 3$逆矩阵）。
+    \item 代入两个约束$\mu^\top w = 0.15$和$\mathbf{1}^\top w = 1$，得到关于$(\lambda, \nu)$的$2\times 2$线性方程组。定义
+    \[
+    a = \mu^\top \Sigma^{-1}\mu, \quad b = \mu^\top \Sigma^{-1}\mathbf{1}, \quad c = \mathbf{1}^\top\Sigma^{-1}\mathbf{1}
+    \]
+    计算$a,b,c$的数值，解出$\lambda^*, \nu^*$。
+    \item 代回求$w^*$。检查$w^*$的各分量是否$\geq 0$。如果某个$w_i^* < 0$，则$w \geq 0$约束被激活——需要将该资产剔除（$w_i = 0$），在剩余资产上重新求解。
+    \item 计算最优组合的期望收益和标准差$(\mu^\top w^*, \sqrt{w^{*\top}\Sigma w^*})$。
+    \item 改变目标收益$r_{\min}$在$[0.10, 0.20]$之间取5个值，重复上述过程，在$(\sigma, \mu)$平面上画出有效前沿的草图。
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{Lagrange对偶的完整推导：支持向量机}]
+数据点：
+\begin{center}
+\begin{tabular}{c|cccccc}
+$i$ & 1 & 2 & 3 & 4 & 5 & 6 \\
+\hline
+$x_i$ & $(3,1)$ & $(3,-1)$ & $(6,1)$ & $(1,0)$ & $(0,1)$ & $(0,-1)$ \\
+$y_i$ & $+1$ & $+1$ & $+1$ & $-1$ & $-1$ & $-1$
+\end{tabular}
+\end{center}
+\begin{subproblems}
+    \item 写出软间隔SVM（$C=10$）的原问题：
+    \[
+    \min_{w,b,\xi} \frac{1}{2}\|w\|^2 + C\sum_i \xi_i \quad \text{s.t.} \quad y_i(w^\top x_i + b) \geq 1-\xi_i, \quad \xi_i \geq 0
+    \]
+    \item 写出完整的Lagrangian和KKT条件（含$\alpha_i$和$\beta_i$两组乘子）。
+    \item 消去$w, b, \xi$，推导出对偶问题：
+    \[
+    \max_\alpha \sum_i \alpha_i - \frac{1}{2}\sum_{i,j}\alpha_i\alpha_j y_i y_j x_i^\top x_j \quad \text{s.t.} \quad 0 \leq \alpha_i \leq C, \quad \sum_i \alpha_i y_i = 0
+    \]
+    \item 计算$6\times 6$的矩阵$Q_{ij} = y_i y_j x_i^\top x_j$（手算每个元素）。
+    \item 利用互补松弛和KKT条件分析：猜测支持向量集合（$\alpha_i > 0$的点），列出方程组求解$\alpha^*$。
+    \item 由$w^* = \sum_i \alpha_i y_i x_i$和$b^*$的计算公式，得到最终分类超平面。画出数据点、超平面和间隔带的示意图。
+\end{subproblems}
+\end{problem}
 \section{第3讲：LP对偶与近似算法}
 
 \begin{problem}[概念题 $\star$]
@@ -537,6 +583,27 @@ A = \begin{pmatrix} 3 & 1 \\ 0 & 4 \end{pmatrix}
 \end{problem}
 
 %--- 第4讲 ---
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{内点法一步迭代}]
+考虑LP：$\min c^\top x$ s.t. $Ax=b, x \geq 0$，其中
+\[
+c = \begin{pmatrix}1\\2\end{pmatrix}, \quad A = \begin{pmatrix}1&1\end{pmatrix}, \quad b = (1)
+\]
+（即$\min x_1 + 2x_2$ s.t. $x_1+x_2=1, x \geq 0$）。
+
+使用对数障碍法，障碍参数$t > 0$：
+\[
+\min_x \; t \cdot c^\top x - \sum_i \ln x_i \quad \text{s.t.} \quad Ax = b
+\]
+\begin{subproblems}
+    \item 写出该问题的KKT系统（对$x$求导并引入等式约束乘子$\nu$）。
+    \item 取$t=1$，手解KKT系统，得到分析中心$x^*(t=1)$。
+    \item 取$t=10$，手解KKT系统，得到$x^*(t=10)$。
+    \item 取$t=100$，手解$x^*(t=100)$。
+    \item 随$t \to \infty$，$x^*(t)$趋向哪里？验证它趋向LP的最优解。
+    \item 画出中心路径$\{x^*(t) : t > 0\}$在$(x_1, x_2)$平面上的轨迹。
+\end{subproblems}
+\end{problem}
 \section{第4讲：算法设计范式与GPU化}
 
 \begin{problem}[概念题 $\star$]
@@ -643,6 +710,40 @@ GPU暴力法的"逆袭"：
 \end{problem}
 
 %--- 第5讲 ---
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{最大流最小割：对偶完整手算}]
+考虑如下网络（$s$为源，$t$为汇）：
+\begin{center}
+\begin{tabular}{lc}
+$s \to A$: 容量 10 & $A \to B$: 容量 4 \\
+$s \to B$: 容量 8  & $A \to t$: 容量 7 \\
+$B \to A$: 容量 2  & $B \to t$: 容量 6
+\end{tabular}
+\end{center}
+\begin{subproblems}
+    \item 将最大流问题写成LP（流守恒约束+容量约束）。
+    \item 手动用增广路径法（Ford-Fulkerson）求最大流。写出每条增广路径和对应的残量图。
+    \item 写出LP的对偶问题，证明它等价于最小割问题。
+    \item 找到最小割（即将节点分为$S$和$T = V\setminus S$两组，使得$s \in S, t \in T$，横跨割的容量最小）。
+    \item 验证最大流值$=$最小割容量（强对偶/最大流最小割定理）。
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{Viterbi算法手算}]
+隐马尔可夫模型（HMM）有3个隐状态$\{H_1, H_2, H_3\}$，2个观测值$\{O_1, O_2\}$。
+\[
+\text{转移矩阵 } A = \begin{pmatrix} 0.6 & 0.3 & 0.1 \\ 0.1 & 0.7 & 0.2 \\ 0.2 & 0.2 & 0.6 \end{pmatrix}, \quad
+\text{发射矩阵 } B = \begin{pmatrix} 0.8 & 0.2 \\ 0.3 & 0.7 \\ 0.5 & 0.5 \end{pmatrix}
+\]
+初始分布$\pi = (0.5, 0.3, 0.2)$。观测序列为$O_1, O_2, O_1, O_1$。
+\begin{subproblems}
+    \item 用Viterbi算法（动态规划）求最可能的隐状态序列。写出$\delta_t(j)$（到时刻$t$隐状态为$j$的最大概率）和$\psi_t(j)$（回溯指针）的完整表格。
+    \item 回溯得到最优路径。
+    \item 该观测序列的似然$P(O|\lambda)$是多少？（用前向算法的$\alpha_t(j)$表格计算。）
+    \item Viterbi和前向算法本质上都是DP。说明两者的状态转移方程的区别（$\max$ vs $\sum$）。
+    \item 分析该DP的反对角线并行性（能否用GPU加速？瓶颈在哪？）
+\end{subproblems}
+\end{problem}
 \section{第5讲：梯度法与预条件}
 
 \begin{problem}[概念题 $\star$]
@@ -823,6 +924,45 @@ A = \begin{pmatrix} 4 & 1 \\ 1 & 3 \end{pmatrix}, \quad b = \begin{pmatrix} 1 \\
 \end{problem}
 
 %--- 第6讲 ---
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{L-BFGS两步迭代完整推导}]
+考虑$f(x,y) = 5x^2 + y^2 - xy - 11x + 5$。
+
+L-BFGS使用最近$m$步的$\{s_k, y_k\}$对近似$H^{-1}$，其中$s_k = x_{k+1} - x_k$，$y_k = \nabla f_{k+1} - \nabla f_k$。
+
+\begin{subproblems}
+    \item 计算$\nabla f(x,y) = (10x - y - 11, \; 2y - x)$。求最优解$x^*$（令$\nabla f = 0$）。
+    \item 从$x_0 = (0,0)^\top$出发，第一步无历史信息，使用$H_0^{-1} = I$，做一步梯度下降：$x_1 = x_0 - \eta H_0^{-1}\nabla f(x_0)$。取$\eta = 0.1$，计算$x_1$。
+    \item 计算$s_0 = x_1 - x_0$，$y_0 = \nabla f(x_1) - \nabla f(x_0)$，$\rho_0 = 1/(y_0^\top s_0)$。
+    \item 使用L-BFGS的two-loop recursion（$m=1$）计算第二步的搜索方向$p_1$：
+    \begin{enumerate}[label=\arabic*.]
+        \item $q = \nabla f(x_1)$
+        \item $\alpha_0 = \rho_0 s_0^\top q$, \; $q \leftarrow q - \alpha_0 y_0$
+        \item $r = H_0^{(1)} q$，其中$H_0^{(1)} = \frac{s_0^\top y_0}{y_0^\top y_0}I$
+        \item $\beta_0 = \rho_0 y_0^\top r$, \; $r \leftarrow r + s_0(\alpha_0 - \beta_0)$
+        \item $p_1 = -r$
+    \end{enumerate}
+    写出每个中间变量的数值。
+    \item 更新$x_2 = x_1 + p_1$（步长取1），计算$f(x_2)$。
+    \item 与纯梯度下降$x_2^{GD}$对比。L-BFGS是否更快地接近了最优解？
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{最速下降法在椭圆函数上的锯齿轨迹}]
+考虑$f(x) = \frac{1}{2}x^\top Ax$，其中$A = \begin{pmatrix} \kappa & 0 \\ 0 & 1 \end{pmatrix}$，$\kappa = 10$。
+从$x_0 = (1,1)^\top$出发，使用精确线搜索的梯度下降。
+\begin{subproblems}
+    \item 对二次函数，精确线搜索步长为$\eta_k = \frac{g_k^\top g_k}{g_k^\top A g_k}$，其中$g_k = Ax_k$。验证这个公式。
+    \item 手算$x_1, x_2, x_3, x_4$（4步完整迭代）。
+    \item 验证相邻两步梯度正交：$g_{k+1}^\top g_k = 0$。
+    \item 证明对二次函数，精确线搜索GD的误差满足
+    \[
+    \frac{f(x_{k+1})}{f(x_k)} \leq \left(\frac{\kappa - 1}{\kappa + 1}\right)^2
+    \]
+    当$\kappa = 10$时，每步最多缩小多少比例？需要多少步使误差降到$10^{-6}$？
+    \item 在$(x_1, x_2)$平面上画出迭代轨迹和$f$的等高线。这就是经典的"锯齿现象"。
+\end{subproblems}
+\end{problem}
 \section{第6讲：流形优化}
 
 \begin{problem}[概念题 $\star$]
@@ -1021,6 +1161,38 @@ A = \begin{pmatrix} 4 & 0 \\ 3 & -5 \\ 0 & 4 \end{pmatrix}
 \end{problem}
 
 %--- 第8讲 ---
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{幂迭代与Krylov子空间}]
+考虑对称矩阵
+\[
+A = \begin{pmatrix} 5 & 4 & 1 \\ 4 & 5 & 1 \\ 1 & 1 & 2 \end{pmatrix}
+\]
+\begin{subproblems}
+    \item \textbf{幂迭代}：从$v_0 = (1, 0, 0)^\top$出发，做幂迭代$v_{k+1} = Av_k / \|Av_k\|$。手算$v_1, v_2, v_3$，以及对应的Rayleigh商$\lambda_k = v_k^\top A v_k$。
+    \item \textbf{Lanczos}：从$q_1 = v_0 / \|v_0\| = (1,0,0)^\top$出发，做Lanczos三对角化。手算3步：
+    \begin{enumerate}[label=\arabic*.]
+        \item $w_1 = Aq_1$, $\alpha_1 = q_1^\top w_1$, $w_1 \leftarrow w_1 - \alpha_1 q_1$, $\beta_1 = \|w_1\|$, $q_2 = w_1/\beta_1$
+        \item $w_2 = Aq_2 - \beta_1 q_1$, $\alpha_2 = q_2^\top w_2$, $w_2 \leftarrow w_2 - \alpha_2 q_2$, $\beta_2 = \|w_2\|$, $q_3 = w_2/\beta_2$
+        \item $w_3 = Aq_3 - \beta_2 q_2$, $\alpha_3 = q_3^\top w_3$
+    \end{enumerate}
+    写出三对角矩阵$T_3 = \begin{pmatrix}\alpha_1 & \beta_1 & 0 \\ \beta_1 & \alpha_2 & \beta_2 \\ 0 & \beta_2 & \alpha_3\end{pmatrix}$。
+    \item 求$T_3$的特征值（它们近似$A$的特征值）。与$A$的真实特征值（$\lambda \approx 0.443, 2.000, 9.557$）比较精度。
+    \item 为什么Lanczos只需$O(n)$的Hessian-vector product就能估计极端特征值？这与深度学习中用Lanczos估计Hessian谱有什么联系？
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{Marchenko-Pastur定律验证}]
+考虑$n \times p$的矩阵$X$，其元素独立同分布于$\mathcal{N}(0, 1/n)$。样本协方差矩阵为$\hat{\Sigma} = X^\top X$。当$n, p \to \infty$，$p/n \to \gamma$时，$\hat{\Sigma}$的特征值的经验分布收敛到Marchenko-Pastur分布。
+
+取$\gamma = 0.5$（即$p = n/2$）。MP分布支撑为$[\lambda_-, \lambda_+]$，其中$\lambda_\pm = (1 \pm \sqrt{\gamma})^2$。
+\begin{subproblems}
+    \item 计算$\lambda_-$和$\lambda_+$的数值。
+    \item MP密度函数为$\rho(\lambda) = \frac{1}{2\pi \gamma \lambda}\sqrt{(\lambda_+ - \lambda)(\lambda - \lambda_-)}$。验证$\int_{\lambda_-}^{\lambda_+}\rho(\lambda)d\lambda = 1$（利用半圆的面积公式）。
+    \item 计算MP分布的均值$\mathbb{E}[\lambda] = 1$和方差$\text{Var}[\lambda] = \gamma$。
+    \item 现在加入信号：$X = U_{\text{signal}} + Z$，其中$U_{\text{signal}}$是rank-1矩阵（一个强信号方向），$Z$是噪声。$\hat{\Sigma}$的特征值分布变为"bulk + 一个outlier"。BBP相变说：只有当信号强度$\sigma^2 > \sqrt{\gamma}$时，outlier才从bulk中跳出。当$\gamma = 0.5$时，临界信号强度是多少？
+    \item 联系课程第9讲：为什么训练好的神经网络权重矩阵的奇异值分布偏离MP分布是"好事"？
+\end{subproblems}
+\end{problem}
 \section{第8讲：随机优化}
 
 \begin{problem}[概念题 $\star$]
@@ -1241,6 +1413,194 @@ Lanczos算法核心：用$Hv$（而非完整$H$）做三对角化。每步只需
 \end{problem}
 
 %--- 第10讲 ---
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{算力该给谁：大模型还是大Batch？}]
+你有固定的GPU预算$C$（以FLOPs计）。你可以选择模型大小$N$（参数量）和训练数据量$D$（token数）。训练的总计算量近似为$C \approx 6ND$。
+
+经验上，在充分训练后，模型的测试loss满足如下幂律关系（Scaling Law）：
+\[
+L(N, D) \approx \left(\frac{N_0}{N}\right)^{\alpha} + \left(\frac{D_0}{D}\right)^{\beta} + L_\infty
+\]
+其中$\alpha \approx 0.076$，$\beta \approx 0.095$，$L_\infty$是不可约误差，$N_0, D_0$是常数。
+\begin{subproblems}
+    \item \textbf{(从第8讲出发)} 回忆SGD在强凸函数上的收敛率$O(1/T)$和凸函数上的$O(1/\sqrt{T})$。对于固定模型，增加训练步数$T$（等价于增加$D$）的边际收益是递减的。用$L$关于$D$的幂律项$D^{-\beta}$解释这一点。
+
+    \item 现在固定总预算$C = 6ND$。将$D = C/(6N)$代入，得到$L$仅关于$N$的函数$L(N) = (N_0/N)^\alpha + (6N \cdot D_0/C)^{-\beta} + L_\infty$。对$N$求导，找到最优模型大小$N^*(C)$。证明$N^* \propto C^{\beta/(\alpha+\beta)}$。
+
+    \item 代入$\alpha=0.076, \beta=0.095$，计算$N^*$和$D^*$各随$C$的增长指数。当预算翻倍时，最优策略是模型变大多少？数据变多多少？
+
+    \item \textbf{(关键洞察)} 一个同学说："我有很多GPU，所以我把batch size开到最大，把小模型训到极致。"请用上述分析解释为什么这在经济上是次优的——同样的FLOPs花在更大的模型上，loss会更低。给出具体的数值例子：$C = 10^{21}$时，用$N=10^9$训$D=C/(6N)$的loss vs 用$N=10^{10}$训$D=C/(6N)$的loss。
+
+    \item \textbf{(更深的问题)} 第8讲说大batch训练存在"critical batch size" $B_{\text{crit}}$，超过它后加速比急剧下降。假设$B_{\text{crit}} \propto L / \|\nabla L\|^2$（梯度噪声尺度），对于loss更低的大模型，$B_{\text{crit}}$更大还是更小？这如何进一步支持"算力应给大模型"的论点？
+
+    \item \textbf{(开放)} 以上分析假设所有数据质量相同。如果数据存在质量差异（如网页爬取 vs 精心标注），Scaling Law会如何修正？你认为"数据工程"在当前范式下的价值是什么？
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{从方差传播推导初始化方法}]
+考虑$L$层全连接网络（无偏置，无BN）：$h^{(l)} = W^{(l)} \sigma(h^{(l-1)})$，其中$\sigma$是激活函数。每层宽度为$n$，$W^{(l)} \in \mathbb{R}^{n \times n}$，权重独立同分布于$\mathcal{N}(0, \sigma_w^2/n)$。
+
+\begin{subproblems}
+    \item \textbf{(前向方差传播)} 假设$h^{(0)}$的各分量独立、均值0、方差1。对于线性激活$\sigma(x) = x$，证明$\text{Var}[h_j^{(l)}] = (n \sigma_w^2)^l$（用归纳法）。要使信号不爆炸也不消失，$\sigma_w^2$应取多少？
+
+    \item \textbf{(ReLU)} 对$\sigma(x) = \max(0, x)$，计算$\mathbb{E}[\sigma(z)^2]$（$z \sim \mathcal{N}(0,1)$）。由此证明前向方差传播变为$\text{Var}[h_j^{(l)}] = \left(\frac{n \sigma_w^2}{2}\right)^l$。要保持方差不变，$\sigma_w^2$应取多少？这就是\textbf{He初始化}。
+
+    \item \textbf{(反向梯度传播)} 设loss对第$l$层输出的梯度为$\delta^{(l)}$。证明$\delta^{(l-1)} = (W^{(l)})^\top \delta^{(l)} \cdot \sigma'(h^{(l-1)})$。类似地分析$\text{Var}[\delta^{(l-1)}]$与$\text{Var}[\delta^{(l)}]$的关系。要使梯度不消失不爆炸，对$\sigma_w^2$的要求是什么？
+
+    \item \textbf{(Xavier/Glorot的折中)} 前向要求$\sigma_w^2 = 1/n_{\text{in}}$，反向要求$\sigma_w^2 = 1/n_{\text{out}}$。当$n_{\text{in}} \neq n_{\text{out}}$时，Xavier初始化取$\sigma_w^2 = 2/(n_{\text{in}} + n_{\text{out}})$作为折中。解释这个选择的合理性。
+
+    \item \textbf{(数值验证)} 取$L=50$, $n=256$。分别用$\sigma_w^2 = 1/n$（Xavier）、$\sigma_w^2 = 2/n$（He）、$\sigma_w^2 = 0.01/n$（太小）、$\sigma_w^2 = 10/n$（太大），计算第$L$层激活的理论方差。哪些会导致数值上溢或下溢？
+
+    \item \textbf{(连接第6讲：正交初始化)} 如果$W^{(l)}$是正交矩阵（$W^\top W = I$），无论多少层，线性网络的前向和反向信号都不会衰减。解释这与Stiefel流形优化的联系。正交初始化在实践中与He初始化相比有什么优劣？
+
+    \item \textbf{(开放)} Transformer中的初始化有何不同？残差连接$h^{(l)} = h^{(l-1)} + f^{(l)}(h^{(l-1)})$如何改变方差传播？如果有$L$个残差块，$f^{(l)}$的初始化尺度应该怎么随$L$调整？（提示：GPT-2使用$1/\sqrt{L}$缩放。）
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{BatchNorm到底在做什么？}]
+Batch Normalization对每层的激活做归一化：$\hat{h}_j = (h_j - \mu_B)/\sigma_B$（$\mu_B, \sigma_B$是batch内的均值和标准差），再做仿射变换$\tilde{h}_j = \gamma \hat{h}_j + \beta$。
+
+\begin{subproblems}
+    \item \textbf{(第5讲的视角：预条件)} 考虑两层线性网络$y = w_2(w_1 x)$。如果放大$w_1$为$\alpha w_1$，同时缩小$w_2$为$w_2/\alpha$，输出不变。但$\nabla_{w_1} L$会变化。证明这种"尺度不变性破坏"使得loss landscape的条件数变差。BN通过归一化消除了激活的尺度——从这个角度解释BN为什么加速训练。
+
+    \item \textbf{(Lipschitz平滑化)} 有研究表明BN的主要作用不是"减少internal covariate shift"，而是使loss landscape更加平滑（loss的梯度更Lipschitz）。回忆第5讲：$L$-光滑函数上GD的收敛率为$O(1/(LT))$。如果BN将$L$减小了一半，收敛率如何变化？这对步长选择有什么影响？
+
+    \item \textbf{(BN与batch size的纠缠)} BN的统计量$\mu_B, \sigma_B$依赖于batch。当batch size很小时，估计不准；很大时统计量稳定。回忆第8讲的大batch训练，解释为什么BN在大batch（$\geq 4096$）下反而出现问题。Group Norm和Layer Norm是如何绕开这个问题的？
+
+    \item \textbf{(开放)} 在当前的LLM训练中，几乎没有使用BatchNorm，而是用LayerNorm或RMSNorm。从"训练稳定性"和"并行友好度"两个角度分析原因。RMSNorm只保留了BN的哪一部分（均值中心化 vs 方差归一化）？为什么这就够了？
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{平坦极小值与泛化}]
+\begin{subproblems}
+    \item \textbf{(从第9讲出发)} 课程说高维loss landscape中大多数临界点是鞍点，低loss区域多是极小值。但极小值有"锐利"和"平坦"之分。直觉上解释为什么平坦的极小值（Hessian特征值小）可能泛化更好。
+
+    \item \textbf{(PAC-Bayes视角)} PAC-Bayes界说：对参数加扰动$w \to w + \epsilon$（$\epsilon \sim \mathcal{N}(0, \sigma^2 I)$），如果训练loss不变，则泛化gap小。形式化地：
+    \[
+    L_{\text{test}}(w) \leq \mathbb{E}_\epsilon[L_{\text{train}}(w+\epsilon)] + O\left(\sqrt{\frac{\|w\|^2/(2\sigma^2) + \ln n}{n}}\right)
+    \]
+    解释为什么"平坦"区域对应更好的PAC-Bayes界。
+
+    \item \textbf{(大batch vs 小batch)} 经验上，大batch SGD倾向于收敛到锐利极小值，小batch SGD倾向于收敛到平坦极小值。从SGD噪声的角度解释原因：SGD的有效噪声协方差为$\Sigma_{\text{noise}} \approx \frac{1}{B}\text{Cov}[\nabla f_i]$。$B$增大时噪声减小，为什么这会改变收敛到的极小值类型？
+
+    \item \textbf{(SAM: Sharpness-Aware Minimization)} SAM的更新公式为：
+    \[
+    w \leftarrow w - \eta \nabla_w L(w + \rho \frac{\nabla L(w)}{\|\nabla L(w)\|})\bigg|_w
+    \]
+    即先在梯度方向"走一步"扰动，再计算该处的梯度做更新。解释SAM为什么倾向于找到平坦极小值。SAM每步的计算代价是普通SGD的多少倍？
+
+    \item \textbf{(回到Scaling Law)} 如果大模型有更多的平坦极小值（过参数化使得loss landscape更"简单"），这为"大模型泛化更好"提供了另一个角度的解释。结合第9讲的过参数化隐式正则化理论，讨论模型规模与泛化的关系。
+
+    \item \textbf{(开放)} "Double Descent"现象：随着模型大小增加，测试误差先降后升（经典偏差-方差），然后在过参数化区域再次下降。你认为这与loss landscape的几何有什么关系？过参数化区域的极小值有什么特殊性质？
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{深度的表达力与优化效率}]
+\begin{subproblems}
+    \item \textbf{(表达力)} 考虑用深度$L$、宽度$n$的ReLU网络逼近函数$f(x) = x^2$在$[0,1]$上。$L=1$（一层）时需要$n$个ReLU单元达到$O(1/n^2)$的逼近误差。证明$L=O(\log(1/\epsilon))$层、$n=O(1)$宽即可达到$\epsilon$误差。（提示：$x^2$可以通过逐步"对折"逼近。）
+
+    \item \textbf{(深度矩阵分解)} 考虑矩阵补全问题：$\min_X \|P_\Omega(X - M)\|_F^2$ s.t. $\text{rank}(X) \leq k$。将$X$参数化为$X = W_L W_{L-1} \cdots W_1$（深度$L$的矩阵分解）。第9讲说深度分解有隐式正则化：
+    \[
+    \dot{\sigma}_r \propto \sigma_r^{2-2/L} \cdot \text{(gradient signal)}
+    \]
+    当$L$很大时，小奇异值$\sigma_r$的增长率远小于大奇异值。解释为什么这导致低秩偏好。
+
+    \item \textbf{(连接第6讲)} 如果我们在Stiefel流形上优化$W_l$（正交约束），$\sigma_r$全部等于1，上述隐式正则化消失。这说明什么？为什么"不对称性"对深度学习的归纳偏置很重要？
+
+    \item \textbf{(连接第9讲：NTK的局限)} NTK理论说无限宽网络等价于核方法——但核方法没有"深度优势"（特征不随训练变化）。这意味着有限宽度的特征学习（feature learning）才是深度的关键。从这个角度，NTK理论恰恰解释了"深度无用"的极限情形。讨论这对理解现实中深度网络的启示。
+
+    \item \textbf{(开放)} Transformer的depth vs width trade-off：有研究表明增加深度比增加宽度更"计算高效"。从优化和表达力两个角度分析可能的原因。
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{学习率的"相变"与Edge of Stability}]
+\begin{subproblems}
+    \item \textbf{(经典理论)} 第5讲说$L$-光滑函数上GD收敛要求步长$\eta < 2/L$（$L$是Hessian最大特征值）。证明：如果$\eta > 2/L$，则在Hessian最大特征值方向上迭代发散。
+
+    \item \textbf{(Edge of Stability现象)} 但在实践中，全batch GD训练神经网络时观察到：Hessian最大特征值$\lambda_{\max}$会自动调整到$\approx 2/\eta$附近振荡！即系统"走到稳定性的边缘"但不崩溃。这违反了经典理论——经典理论假设$L$不变，但神经网络的$L$是会变的。
+
+    从优化景观的角度解释：当$\lambda_{\max} > 2/\eta$时，最陡方向上的迭代会"弹开"，使参数移动到$\lambda_{\max}$较小的区域。这形成一种负反馈机制。画出$\lambda_{\max}$随训练的示意图。
+
+    \item \textbf{(学习率Warmup)} 训练初期loss landscape曲率很大（$\lambda_{\max}$大），直接用大学习率会发散。Warmup在前$T_w$步线性增大学习率$\eta_t = \eta_{\max} \cdot t/T_w$。从Edge of Stability的视角解释warmup的作用：给网络时间让$\lambda_{\max}$先降下来。
+
+    \item \textbf{(Cosine Decay)} 常见学习率衰减方案$\eta_t = \eta_{\min} + \frac{1}{2}(\eta_{\max} - \eta_{\min})(1 + \cos(\pi t / T))$。如果按第5讲的理论，凸函数上的最优步长衰减是$O(1/t)$或$O(1/\sqrt{t})$。Cosine Decay不属于任何一种，但在实践中更好。从"先探索后精化"的角度解释cosine schedule的设计直觉。
+
+    \item \textbf{(连接第8讲)} 回忆SGD收敛率$O(\sigma^2\eta / (1-\eta L) + (1-\eta\mu)^T)$中的两项：优化误差和统计误差。学习率大时优化快但统计误差大。推导"两阶段"策略的最优切换点：先用大$\eta$快速降低优化误差，再用小$\eta$降低统计误差。这与warmup+decay的实践做法是否一致？
+
+    \item \textbf{(开放)} 最近有研究尝试完全去掉学习率调度，用"Mechanistic Design"（如Muon优化器、Schedule-Free Adam）。你觉得学习率调度是"必须的物理"还是"工程补丁"？
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star$ \textbf{梯度裁剪的理论基础}]
+大模型训练中几乎必用梯度裁剪：$g \leftarrow g \cdot \min\left(1, \frac{c}{\|g\|}\right)$。
+\begin{subproblems}
+    \item \textbf{(第5讲视角)} 不裁剪时，梯度下降步$x \leftarrow x - \eta g$。如果$\|g\|$很大（远大于$L$-光滑性保证的范围），下降引理$f(x-\eta g) \leq f(x) - \eta\|g\|^2 + \frac{L\eta^2}{2}\|g\|^2$可能不再保证下降。解释梯度裁剪的作用：将有效步长限制为$\eta c / \|g\|$。
+
+    \item \textbf{(连接第14讲：信任域)} 注意到裁剪后的更新满足$\|x_{k+1} - x_k\| \leq \eta c$——这正是一个信任域约束！从TRPO/PPO的思路理解梯度裁剪：它是最简单的信任域方法。
+
+    \item \textbf{(实际考虑)} 在Transformer训练中，梯度裁剪阈值$c$通常设为$1.0$。如果$c$太小，训练太慢；太大，等于没裁剪。设计一个实验方案来找到最优的$c$。
+
+    \item \textbf{(开放)} 除了梯度裁剪，还有哪些手段可以稳定大模型训练？（如loss scaling、gradient accumulation、架构层面的Pre-Norm vs Post-Norm。）从优化的角度将它们统一为"控制每步更新量"的不同策略。
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{Lottery Ticket与稀疏优化}]
+\begin{subproblems}
+    \item \textbf{(Lottery Ticket假说)} 一个随机初始化的稠密网络包含一个稀疏子网络（"中奖彩票"），该子网络\emph{使用原始初始化}可以训练到与稠密网络相同的精度。这意味着什么？从第9讲的过参数化角度：稠密网络的作用是否只是提供了足够多的"彩票"供优化选择？
+
+    \item \textbf{(连接$\ell_1$正则化)} 第15讲的LASSO使用$\ell_1$范数促进稀疏。如果对网络权重加$\ell_1$正则化$\lambda\|w\|_1$，能找到"中奖彩票"吗？为什么简单的$\ell_1$在深度网络上效果不如"迭代剪枝"（train → prune → rewind → retrain）？
+
+    \item \textbf{(Mixture of Experts)} 现代LLM（如Mixtral）使用稀疏MoE：每个token只激活$k/n$的参数。这是另一种"动态稀疏性"。从计算量的角度：如果MoE有$N$个参数但每个token只用$N/8$个，训练FLOPs接近$N/8$的稠密模型，但表达力接近$N$。结合Scaling Law讨论：MoE是否改变了$N$-$D$-$C$的最优分配？
+
+    \item \textbf{(开放)} 人脑有$\sim 10^{11}$个神经元，但同一时刻只有$\sim 1\%$在活跃放电。讨论生物稀疏性与Lottery Ticket/MoE之间可能的联系。
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{Attention为什么有效，以及如何加速它}]
+自注意力机制：$\text{Attn}(Q,K,V) = \text{softmax}(QK^\top / \sqrt{d_k})V$，其中$Q,K,V \in \mathbb{R}^{n \times d_k}$。
+\begin{subproblems}
+    \item \textbf{(第7讲视角：低秩近似)} 注意力矩阵$A = \text{softmax}(QK^\top/\sqrt{d_k})$是$n \times n$的。如果$A$近似低秩（少数几个token主导注意力），那么$AV$可以用随机化方法近似。设$A$的有效秩为$k \ll n$，估计近似计算的加速比。
+
+    \item \textbf{(IO复杂度)} 第16讲的FlashAttention的核心洞察不是减少FLOPs，而是减少HBM（高带宽内存）访问。标准Attention需要将$n \times n$的注意力矩阵写入HBM再读出做$\times V$。FlashAttention通过分块计算（tiling），在SRAM中完成softmax和$\times V$，只写最终结果到HBM。
+
+    假设SRAM大小$M$，矩阵$Q,K,V$各$n \times d$。标准Attention的HBM访问量为$O(nd + n^2)$，FlashAttention为$O(n^2 d^2/M)$。当$d^2 < M$（通常成立，$d=64$, $M \sim 10^5$）时，FlashAttention的IO复杂度近似$O(n^2 d^2/M)$。与标准的$O(n^2)$比较，加速因子是什么？
+
+    \item \textbf{(连接第4讲：分治)} KV-Cache在自回归生成中缓存已计算的$K,V$。生成第$t$个token时，只需计算新的$q_t$与所有历史$K_{1:t}$的注意力。这将生成$n$个token的复杂度从$O(n^3 d)$降到$O(n^2 d)$。推导这个结果。
+
+    \item \textbf{(稀疏注意力)} 如果限制每个token只关注$k$个最近的token（sliding window）加上$s$个全局token，注意力矩阵变成稀疏的。计算FLOPs从$O(n^2 d)$降到多少？这对长文本（$n > 100000$）意味着什么？
+
+    \item \textbf{(开放)} 近年来有很多"线性注意力"工作（如Mamba, RWKV），将$O(n^2)$降到$O(n)$。但它们在某些任务上不如标准Transformer。你认为$O(n^2)$的注意力捕获了什么是$O(n)$架构难以捕获的？从"表达力 vs 效率"的trade-off讨论。
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{为什么大模型会"涌现"新能力？}]
+\begin{subproblems}
+    \item \textbf{(相变的类比)} 第1讲讨论了计算复杂性中的相变（如随机SAT在子句密度$m/n \approx 4.27$处从几乎全可满足变为几乎全不可满足）。类似地，LLM在模型规模增大时，某些能力（如思维链推理、多位数加法）似乎"突然出现"。
+
+    从优化的角度思考：如果某个能力需要网络学到一个特定的"电路"（子网络），而这个电路需要最少$N_{\min}$个参数才能表达，那么在$N < N_{\min}$时loss在该任务上无法下降，$N > N_{\min}$时loss突然可以下降。画出"某任务的loss vs 模型大小"的示意图。
+
+    \item \textbf{(Grokking)} 另一个"相变"现象：网络先记住训练数据（过拟合），很久之后突然学会泛化规律（grokking）。从隐式正则化的角度：GD的轨迹先到达一个"记忆解"（高复杂度），然后缓慢漂移到"泛化解"（低复杂度）。这与第9讲的最小范数偏好有什么联系？
+
+    \item \textbf{(连接第11讲：探索-利用)} 如果将训练过程类比为Bandit问题：模型在"简单特征"和"复杂特征"之间分配"学习容量"。训练初期利用简单特征就能降loss（exploitation），后期需要发现更复杂的模式（exploration）。学习率调度是否可以理解为控制这种探索-利用的balance？
+
+    \item \textbf{(开放)} "涌现"是真实的还是度量（metric）的假象？有研究指出如果用连续的loss（而非accuracy这样的阈值度量），"涌现"变成了平滑的改进。你如何设计实验来区分"真正的相变"和"度量假象"？
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star$ \textbf{推理比训练更重要：推理优化的数学}]
+训练一个LLM花费$C_{\text{train}}$，但部署后每个query的推理成本$c_{\text{infer}}$会被调用$Q$次。总成本$C_{\text{total}} = C_{\text{train}} + Q \cdot c_{\text{infer}}$。
+\begin{subproblems}
+    \item 当$Q > C_{\text{train}} / c_{\text{infer}}$时，推理成本主导。对GPT-4量级（$C_{\text{train}} \sim 10^{25}$ FLOPs, $Q \sim 10^{12}$ queries），估算$c_{\text{infer}}$的临界值。
+
+    \item \textbf{(量化)} 将FP16权重量化到INT4，理论上推理速度提升多少？（考虑带宽瓶颈：自回归生成是memory-bandwidth bound，速度$\propto$模型大小/内存带宽。）权重从2字节变为0.5字节，速度提升约$4\times$。但量化带来精度损失。从第7讲的随机化视角：量化可以看作一种"有偏sketching"。如何用随机舍入（stochastic rounding）减小偏差？
+
+    \item \textbf{(Speculative Decoding)} 用一个小模型（draft model）快速生成$k$个候选token，再用大模型（target model）并行验证。如果小模型的接受率为$\alpha$，期望每次验证通过的token数为$k\alpha$。总加速比近似$k\alpha / (c_{\text{draft}} \cdot k + c_{\text{target}})$。如果$c_{\text{draft}} = c_{\text{target}}/10$, $\alpha = 0.8$, $k=5$，计算加速比。
+
+    \item \textbf{(连接第4讲)} 自回归生成本质上是顺序的（第$t$个token依赖第$t-1$个）。这与第4讲中"贪心算法的GPU困境"类似。Speculative Decoding是如何"打破"这种顺序依赖的？从分治法的"投机执行"（speculative execution）角度理解。
+
+    \item \textbf{(开放)} "Test-time compute"（如OpenAI o1的思维链推理）用更多推理计算换取更好的回答。从在线优化的角度：这相当于在推理时做额外的"搜索"。你认为训练计算和推理计算之间存在Scaling Law吗？
+\end{subproblems}
+\end{problem}
 \section{第10讲：变分法与最优控制}
 
 \begin{problem}[概念题 $\star$]
@@ -1342,6 +1702,42 @@ T[y] = \int_0^{x_1} \sqrt{\frac{1 + y'^2}{2gy}} \, dx
 \end{problem}
 
 %--- 第11讲 ---
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{变分推断完整推导：高斯混合模型}]
+观测$x \in \mathbb{R}$，隐变量$z \in \{1, 2\}$表示簇归属。模型：
+\[
+p(z=k) = \pi_k, \quad p(x|z=k) = \mathcal{N}(x; \mu_k, 1)
+\]
+取$\pi_1 = \pi_2 = 0.5$, $\mu_1 = -1$, $\mu_2 = 2$。观测到$x_0 = 0.5$。
+\begin{subproblems}
+    \item 精确后验$p(z|x_0)$：用贝叶斯公式计算$p(z=1|x_0)$和$p(z=2|x_0)$。
+
+    （需要计算$\mathcal{N}(0.5; -1, 1)$和$\mathcal{N}(0.5; 2, 1)$的密度值。）
+    \item 现在考虑完整的变分推断。假设有$n=3$个观测$\mathbf{x} = (x_1, x_2, x_3) = (-0.5, 0.3, 1.8)$，隐变量$\mathbf{z} = (z_1, z_2, z_3)$。
+
+    Mean-field近似：$q(\mathbf{z}) = \prod_i q_i(z_i)$，其中$q_i(z_i = k) = r_{ik}$。
+    \item 写出ELBO：$\text{ELBO} = \sum_i \sum_k r_{ik}[\ln \pi_k + \ln \mathcal{N}(x_i;\mu_k,1) - \ln r_{ik}]$。
+    \item CAVI（坐标上升变分推断）更新：
+    \[
+    \ln r_{ik}^{\text{new}} \propto \ln \pi_k + \ln \mathcal{N}(x_i; \mu_k, 1) = \ln \pi_k - \frac{(x_i-\mu_k)^2}{2} + \text{const}
+    \]
+    然后归一化$r_{ik}$。从$r_{ik} = 0.5$出发，手算一轮CAVI更新。
+    \item 计算更新后的ELBO值，验证它增大了。
+\end{subproblems}
+\end{problem}
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{Pontryagin极大原理：双积分器}]
+系统$\ddot{q} = u$（即$\dot{x}_1 = x_2, \dot{x}_2 = u$），$x_1(0) = 1, x_2(0) = 0$。目标：在$T=2$时到达$x_1(2)=0, x_2(2)=0$，最小化$J = \int_0^2 \frac{1}{2}u^2 dt$。
+\begin{subproblems}
+    \item 写出Hamiltonian $H = \frac{1}{2}u^2 + p_1 x_2 + p_2 u$。
+    \item 由$\partial H/\partial u = 0$得最优控制$u^* = -p_2$。
+    \item 写出伴随方程：$\dot{p}_1 = -\partial H/\partial x_1 = 0$, $\dot{p}_2 = -\partial H/\partial x_2 = -p_1$。求解$p_1(t), p_2(t)$。
+    \item 代入$u^* = -p_2$和状态方程，求解$x_1(t), x_2(t)$（含待定常数$p_1(0)$和$p_2(0)$）。
+    \item 利用终端条件$x_1(2) = 0, x_2(2) = 0$确定$p_1(0), p_2(0)$。
+    \item 写出最优控制$u^*(t)$和最优轨迹$x^*(t)$的显式表达式。计算最优代价$J^*$。
+    \item 该问题的HJB方程是什么形式？验证value function $V(x,t)$满足HJB方程。
+\end{subproblems}
+\end{problem}
 \section{第11讲：在线优化与Regret框架}
 
 \begin{problem}[概念题 $\star$]
@@ -1517,6 +1913,23 @@ OGD更新：$\tilde{x}_{t+1} = x_t - \eta \nabla \ell_t(x_t)$，$x_{t+1} = \Pi_\
 \end{problem}
 
 %--- 第12讲 ---
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{Mirror Descent完整推导}]
+在单纯形$\Delta_n = \{p \in \mathbb{R}^n : p_i \geq 0, \sum p_i = 1\}$上做在线优化。Mirror Descent使用负熵作为Bregman散度：$\Phi(p) = \sum_i p_i \ln p_i$。
+
+取$n=3$（3个专家），$\eta = 0.5$。
+\begin{subproblems}
+    \item Bregman散度$D_\Phi(p\|q) = \sum_i p_i \ln(p_i/q_i)$（即KL散度）。验证$D_\Phi$非负且当$p=q$时为零。
+    \item Mirror Descent更新：$p_{t+1} = \arg\min_{p \in \Delta_n} \left[\eta \langle \ell_t, p \rangle + D_\Phi(p \| p_t)\right]$。证明闭式解为：
+    \[
+    p_{t+1}^i = \frac{p_t^i \cdot e^{-\eta \ell_t^i}}{\sum_j p_t^j \cdot e^{-\eta \ell_t^j}}
+    \]
+    （这就是Multiplicative Weights Update！）
+    \item 从$p_1 = (1/3, 1/3, 1/3)$出发，损失向量$\ell_1 = (1, 0, 0.5)$, $\ell_2 = (0, 1, 0.5)$, $\ell_3 = (0.5, 0.5, 0)$。手算$p_2, p_3, p_4$。
+    \item 计算Regret $= \sum_t \langle \ell_t, p_t \rangle - \min_i \sum_t \ell_t^i$。
+    \item 一般Regret界为$\frac{\ln n}{\eta} + \frac{\eta T}{2}$。取$\eta = \sqrt{2\ln n / T}$可得$O(\sqrt{T \ln n})$。当$n=3, T=3$时，理论界给出多少？与你算的实际Regret比较。
+\end{subproblems}
+\end{problem}
 \section{第12讲：MDP与Tabular RL理论}
 
 \begin{problem}[概念题 $\star$]
@@ -1656,6 +2069,28 @@ P(s_1|s_2,b) = 0.9, \quad P(s_2|s_2,b) = 0.1, \quad R(s_2,b) = 2
 \end{problem}
 
 %--- 第13讲 ---
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{Q-learning完整手算}]
+$3 \times 3$ GridWorld，起点$s_1$（左上），终点$s_9$（右下，奖励$+10$），$s_5$是"陷阱"（奖励$-5$）。其余步奖励$-1$。$\gamma = 0.9$，$\varepsilon = 0.1$。
+
+动作空间$\{$上、下、左、右$\}$，确定性转移（碰墙不动）。
+
+初始$Q(s,a) = 0$，学习率$\alpha = 0.5$。
+给定以下经验轨迹：
+\begin{align*}
+s_1 \xrightarrow{\text{右},r=-1} s_2 \xrightarrow{\text{右},r=-1} s_3 \xrightarrow{\text{下},r=-1} s_6 \xrightarrow{\text{下},r=-1} s_9(+10)
+\end{align*}
+\begin{subproblems}
+    \item 对轨迹中每一步做Q-learning更新：
+    \[
+    Q(s,a) \leftarrow Q(s,a) + \alpha[r + \gamma \max_{a'} Q(s',a') - Q(s,a)]
+    \]
+    从最后一步$s_6 \to s_9$开始（为什么从后往前更新等价于多次前向？），写出每次更新后变化的$Q$值。
+    \item 再给一条轨迹：$s_1 \to s_4 \to s_5(-5) \to s_6 \to s_9(+10)$。更新所有$Q$值。
+    \item 经过两条轨迹后，从$s_1$出发的$\varepsilon$-greedy策略会选什么动作？
+    \item 与SARSA的更新$Q(s,a) \leftarrow Q(s,a) + \alpha[r + \gamma Q(s',a') - Q(s,a)]$对比。如果第二条轨迹中的动作也由$\varepsilon$-greedy产生（假设$s_4$处探索选了"下"落入陷阱），SARSA的更新与Q-learning有何不同？
+\end{subproblems}
+\end{problem}
 \section{第13讲：深度RL与策略优化}
 
 \begin{problem}[概念题 $\star$]
@@ -1768,6 +2203,27 @@ P(s_1|s_2,b) = 0.9, \quad P(s_2|s_2,b) = 0.1, \quad R(s_2,b) = 2
 \end{problem}
 
 %--- 第14讲 ---
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{策略梯度的方差分析}]
+考虑一个简单的MDP：$|S|=1$（只有一个状态），$|A|=3$（三个动作），奖励为$R(a_1)=1$, $R(a_2)=2$, $R(a_3)=0$（确定性）。策略用softmax参数化：
+\[
+\pi_\theta(a_k) = \frac{e^{\theta_k}}{\sum_j e^{\theta_j}}, \quad \theta = (\theta_1, \theta_2, \theta_3)
+\]
+取$\theta = (0, 0, 0)$（均匀策略）。
+\begin{subproblems}
+    \item 计算$\pi_\theta(a_k) = 1/3$，$\forall k$。
+    \item 对每个动作$a_k$，计算$\nabla_\theta \log \pi_\theta(a_k)$。
+
+    提示：$\frac{\partial \log \pi_\theta(a_k)}{\partial \theta_j} = \mathbf{1}_{j=k} - \pi_\theta(a_j)$。
+    \item 计算策略梯度的精确值：
+    \[
+    g = \mathbb{E}_{a \sim \pi}[R(a) \nabla_\theta \log \pi_\theta(a)] = \sum_k \pi_\theta(a_k) R(a_k) \nabla_\theta \log \pi_\theta(a_k)
+    \]
+    \item 计算梯度估计的方差$\text{Var}_{a \sim \pi}[R(a) \nabla_\theta \log \pi_\theta(a)]$（每个分量的方差）。
+    \item 引入baseline $b = \bar{R} = \mathbb{E}[R(a)] = 1$，重新计算策略梯度（验证期望不变）和方差（验证方差减小）。
+    \item 最优baseline $b^* = \frac{\mathbb{E}[R^2 \|\nabla \log \pi\|^2]}{\mathbb{E}[\|\nabla \log \pi\|^2]}$，计算$b^*$的值。对比$b=0$、$b=\bar{R}$和$b=b^*$三种情况的方差。
+\end{subproblems}
+\end{problem}
 \section{第14讲：PPO——约束优化的巅峰}
 
 \begin{problem}[概念题 $\star$]
@@ -1867,6 +2323,23 @@ $\pi_\theta(a|s)$ & 0.6 & 0.3 & 0.1
 \end{problem}
 
 %--- 第15讲 ---
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{当奖励模型骗了你：Goodhart定律的优化解读}]
+RLHF中，我们用PPO优化一个学习到的奖励模型$r_\phi(x,y)$（$x$是prompt，$y$是response）。
+\begin{subproblems}
+    \item \textbf{(第14讲出发)} PPO优化的目标是$\max_\theta \mathbb{E}_{x,y\sim\pi_\theta}[r_\phi(x,y)] - \beta D_{KL}(\pi_\theta \| \pi_{\text{ref}})$。如果没有KL惩罚（$\beta = 0$），会发生什么？$\pi_\theta$会如何利用$r_\phi$的漏洞？
+
+    \item \textbf{(Reward Hacking)} 奖励模型$r_\phi$是在有限数据上训练的，在分布外（out-of-distribution）区域不可靠。当$\pi_\theta$偏离$\pi_{\text{ref}}$太远时，它可能找到$r_\phi$很高但人类评价很低的response。画出示意图：横轴为$D_{KL}(\pi_\theta \| \pi_{\text{ref}})$，纵轴分别为$r_\phi$（proxy reward）和真实人类偏好（true reward）。两条曲线在什么区域开始分叉？
+
+    \item \textbf{(连接第2讲：约束优化)} 从KKT的角度重新理解$\beta$：它是KL约束$D_{KL} \leq \delta$的对偶变量。$\beta$太小$\Leftrightarrow$约束太松$\Leftrightarrow$reward hacking。$\beta$太大$\Leftrightarrow$约束太紧$\Leftrightarrow$策略几乎不更新。最优的$\beta$对应什么？（互补松弛条件意味着什么？）
+
+    \item \textbf{(DPO: 绕开RL)} Direct Preference Optimization直接优化偏好数据，不需要训练显式的奖励模型，也不需要PPO。其关键观察是：最优策略$\pi^*$和奖励$r$之间有闭式关系$r(x,y) = \beta \log \frac{\pi^*(y|x)}{\pi_{\text{ref}}(y|x)} + \beta \log Z(x)$。因此可以将$r$消去，直接用偏好对$(y_w \succ y_l)$优化$\pi$。
+
+    从优化复杂度的角度比较PPO和DPO：PPO需要4个模型（policy, reference, reward, value），DPO只需要2个（policy, reference）。这对GPU显存意味着什么？
+
+    \item \textbf{(开放)} 你认为"对齐税"（alignment tax）——即对齐后模型在基准测试上的能力下降——是不可避免的吗？从多目标优化的帕累托前沿角度分析"能力"和"安全"之间的trade-off。
+\end{subproblems}
+\end{problem}
 \section{第15讲：分布式优化}
 
 \begin{problem}[概念题 $\star$]
@@ -2002,6 +2475,25 @@ g^{(1)} = (1, 2, 3), \quad g^{(2)} = (4, 5, 6), \quad g^{(3)} = (7, 8, 9)
 %========================================
 %========================================
 \newpage
+% 从原文末补充章节归并
+\begin{problem}[$\star\star\star$ \textbf{从KKT到ADMM到分布式：完整链路}]
+考虑分布式LASSO：$K=2$个节点各持有部分数据$(A_1, b_1)$和$(A_2, b_2)$，共同求解：
+\[
+\min_w \frac{1}{2}\|A_1 w - b_1\|^2 + \frac{1}{2}\|A_2 w - b_2\|^2 + \lambda\|w\|_1
+\]
+取$A_1 = \begin{pmatrix}1 & 0\end{pmatrix}$, $b_1 = (2)$, $A_2 = \begin{pmatrix}0 & 1\end{pmatrix}$, $b_2 = (3)$, $\lambda = 0.5$。
+\begin{subproblems}
+    \item \textbf{集中式求解}：直接写KKT条件（次梯度条件），手解最优$w^*$。
+    \item \textbf{共识ADMM分解}：引入局部变量$w_1, w_2$和全局变量$z$：
+    \[
+    \min_{w_1,w_2,z} \frac{1}{2}\|A_1 w_1-b_1\|^2 + \frac{1}{2}\|A_2 w_2-b_2\|^2 + \lambda\|z\|_1 \quad \text{s.t.} \quad w_1 = z, \; w_2 = z
+    \]
+    写出ADMM的$w_1$-更新、$w_2$-更新、$z$-更新（全局软阈值）。
+    \item 取$\rho = 1$，从$z^0 = (0,0)^\top$, $u_1^0 = u_2^0 = (0,0)^\top$出发，手算3轮ADMM迭代。
+    \item 验证ADMM的解趋近于集中式的最优解$w^*$。
+    \item 在这个分解中，每个节点只需要知道什么信息？什么信息需要通信？这体现了分布式优化的什么优势？
+\end{subproblems}
+\end{problem}
 \section*{附：综合题（跨章节）}
 \addcontentsline{toc}{section}{附：综合题（跨章节）}
 \setcounter{problem}{0}
@@ -2045,581 +2537,4 @@ g^{(1)} = (1, 2, 3), \quad g^{(2)} = (4, 5, 6), \quad g^{(3)} = (7, 8, 9)
 % 补充：经典手算计算题
 %========================================
 %========================================
-\section*{补充：经典深度手算题（高阶）}
-\addcontentsline{toc}{section}{补充：经典深度手算题（高阶）}
-\setcounter{problem}{0}
-\renewcommand{\theproblem}{\arabic{problem}}
-
-\bigskip
-\begin{center}
-\textit{以下题目计算量较大、推导链较长，建议留2--3小时专注完成。\\
-每题均有明确的数值答案，可自行验证。}
-\end{center}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{Markowitz投资组合完整推导}]
-三种资产，期望收益$\mu = (0.10, 0.15, 0.20)^\top$，协方差矩阵
-\[
-\Sigma = \begin{pmatrix} 0.04 & 0.006 & 0.002 \\ 0.006 & 0.09 & 0.018 \\ 0.002 & 0.018 & 0.16 \end{pmatrix}
-\]
-考虑$\min_w \frac{1}{2}w^\top \Sigma w$ \; s.t. $\mu^\top w \geq 0.15$, $\mathbf{1}^\top w = 1$, $w \geq 0$。
-\begin{subproblems}
-    \item 先忽略$w \geq 0$约束。写出仅含等式/不等式约束$\mu^\top w \geq 0.15$和$\mathbf{1}^\top w = 1$的Lagrangian $L(w,\lambda,\nu)$。
-    \item 对$w$求导令为零：$\Sigma w = \lambda \mu + \nu \mathbf{1}$，解得$w^* = \Sigma^{-1}(\lambda \mu + \nu \mathbf{1})$。先计算$\Sigma^{-1}$（手算$3\times 3$逆矩阵）。
-    \item 代入两个约束$\mu^\top w = 0.15$和$\mathbf{1}^\top w = 1$，得到关于$(\lambda, \nu)$的$2\times 2$线性方程组。定义
-    \[
-    a = \mu^\top \Sigma^{-1}\mu, \quad b = \mu^\top \Sigma^{-1}\mathbf{1}, \quad c = \mathbf{1}^\top\Sigma^{-1}\mathbf{1}
-    \]
-    计算$a,b,c$的数值，解出$\lambda^*, \nu^*$。
-    \item 代回求$w^*$。检查$w^*$的各分量是否$\geq 0$。如果某个$w_i^* < 0$，则$w \geq 0$约束被激活——需要将该资产剔除（$w_i = 0$），在剩余资产上重新求解。
-    \item 计算最优组合的期望收益和标准差$(\mu^\top w^*, \sqrt{w^{*\top}\Sigma w^*})$。
-    \item 改变目标收益$r_{\min}$在$[0.10, 0.20]$之间取5个值，重复上述过程，在$(\sigma, \mu)$平面上画出有效前沿的草图。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[$\star\star\star$ \textbf{Lagrange对偶的完整推导：支持向量机}]
-数据点：
-\begin{center}
-\begin{tabular}{c|cccccc}
-$i$ & 1 & 2 & 3 & 4 & 5 & 6 \\
-\hline
-$x_i$ & $(3,1)$ & $(3,-1)$ & $(6,1)$ & $(1,0)$ & $(0,1)$ & $(0,-1)$ \\
-$y_i$ & $+1$ & $+1$ & $+1$ & $-1$ & $-1$ & $-1$
-\end{tabular}
-\end{center}
-\begin{subproblems}
-    \item 写出软间隔SVM（$C=10$）的原问题：
-    \[
-    \min_{w,b,\xi} \frac{1}{2}\|w\|^2 + C\sum_i \xi_i \quad \text{s.t.} \quad y_i(w^\top x_i + b) \geq 1-\xi_i, \quad \xi_i \geq 0
-    \]
-    \item 写出完整的Lagrangian和KKT条件（含$\alpha_i$和$\beta_i$两组乘子）。
-    \item 消去$w, b, \xi$，推导出对偶问题：
-    \[
-    \max_\alpha \sum_i \alpha_i - \frac{1}{2}\sum_{i,j}\alpha_i\alpha_j y_i y_j x_i^\top x_j \quad \text{s.t.} \quad 0 \leq \alpha_i \leq C, \quad \sum_i \alpha_i y_i = 0
-    \]
-    \item 计算$6\times 6$的矩阵$Q_{ij} = y_i y_j x_i^\top x_j$（手算每个元素）。
-    \item 利用互补松弛和KKT条件分析：猜测支持向量集合（$\alpha_i > 0$的点），列出方程组求解$\alpha^*$。
-    \item 由$w^* = \sum_i \alpha_i y_i x_i$和$b^*$的计算公式，得到最终分类超平面。画出数据点、超平面和间隔带的示意图。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[$\star\star\star$ \textbf{内点法一步迭代}]
-考虑LP：$\min c^\top x$ s.t. $Ax=b, x \geq 0$，其中
-\[
-c = \begin{pmatrix}1\\2\end{pmatrix}, \quad A = \begin{pmatrix}1&1\end{pmatrix}, \quad b = (1)
-\]
-（即$\min x_1 + 2x_2$ s.t. $x_1+x_2=1, x \geq 0$）。
-
-使用对数障碍法，障碍参数$t > 0$：
-\[
-\min_x \; t \cdot c^\top x - \sum_i \ln x_i \quad \text{s.t.} \quad Ax = b
-\]
-\begin{subproblems}
-    \item 写出该问题的KKT系统（对$x$求导并引入等式约束乘子$\nu$）。
-    \item 取$t=1$，手解KKT系统，得到分析中心$x^*(t=1)$。
-    \item 取$t=10$，手解KKT系统，得到$x^*(t=10)$。
-    \item 取$t=100$，手解$x^*(t=100)$。
-    \item 随$t \to \infty$，$x^*(t)$趋向哪里？验证它趋向LP的最优解。
-    \item 画出中心路径$\{x^*(t) : t > 0\}$在$(x_1, x_2)$平面上的轨迹。
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{L-BFGS两步迭代完整推导}]
-考虑$f(x,y) = 5x^2 + y^2 - xy - 11x + 5$。
-
-L-BFGS使用最近$m$步的$\{s_k, y_k\}$对近似$H^{-1}$，其中$s_k = x_{k+1} - x_k$，$y_k = \nabla f_{k+1} - \nabla f_k$。
-
-\begin{subproblems}
-    \item 计算$\nabla f(x,y) = (10x - y - 11, \; 2y - x)$。求最优解$x^*$（令$\nabla f = 0$）。
-    \item 从$x_0 = (0,0)^\top$出发，第一步无历史信息，使用$H_0^{-1} = I$，做一步梯度下降：$x_1 = x_0 - \eta H_0^{-1}\nabla f(x_0)$。取$\eta = 0.1$，计算$x_1$。
-    \item 计算$s_0 = x_1 - x_0$，$y_0 = \nabla f(x_1) - \nabla f(x_0)$，$\rho_0 = 1/(y_0^\top s_0)$。
-    \item 使用L-BFGS的two-loop recursion（$m=1$）计算第二步的搜索方向$p_1$：
-    \begin{enumerate}[label=\arabic*.]
-        \item $q = \nabla f(x_1)$
-        \item $\alpha_0 = \rho_0 s_0^\top q$, \; $q \leftarrow q - \alpha_0 y_0$
-        \item $r = H_0^{(1)} q$，其中$H_0^{(1)} = \frac{s_0^\top y_0}{y_0^\top y_0}I$
-        \item $\beta_0 = \rho_0 y_0^\top r$, \; $r \leftarrow r + s_0(\alpha_0 - \beta_0)$
-        \item $p_1 = -r$
-    \end{enumerate}
-    写出每个中间变量的数值。
-    \item 更新$x_2 = x_1 + p_1$（步长取1），计算$f(x_2)$。
-    \item 与纯梯度下降$x_2^{GD}$对比。L-BFGS是否更快地接近了最优解？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[$\star\star\star$ \textbf{最速下降法在椭圆函数上的锯齿轨迹}]
-考虑$f(x) = \frac{1}{2}x^\top Ax$，其中$A = \begin{pmatrix} \kappa & 0 \\ 0 & 1 \end{pmatrix}$，$\kappa = 10$。
-从$x_0 = (1,1)^\top$出发，使用精确线搜索的梯度下降。
-\begin{subproblems}
-    \item 对二次函数，精确线搜索步长为$\eta_k = \frac{g_k^\top g_k}{g_k^\top A g_k}$，其中$g_k = Ax_k$。验证这个公式。
-    \item 手算$x_1, x_2, x_3, x_4$（4步完整迭代）。
-    \item 验证相邻两步梯度正交：$g_{k+1}^\top g_k = 0$。
-    \item 证明对二次函数，精确线搜索GD的误差满足
-    \[
-    \frac{f(x_{k+1})}{f(x_k)} \leq \left(\frac{\kappa - 1}{\kappa + 1}\right)^2
-    \]
-    当$\kappa = 10$时，每步最多缩小多少比例？需要多少步使误差降到$10^{-6}$？
-    \item 在$(x_1, x_2)$平面上画出迭代轨迹和$f$的等高线。这就是经典的"锯齿现象"。
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{幂迭代与Krylov子空间}]
-考虑对称矩阵
-\[
-A = \begin{pmatrix} 5 & 4 & 1 \\ 4 & 5 & 1 \\ 1 & 1 & 2 \end{pmatrix}
-\]
-\begin{subproblems}
-    \item \textbf{幂迭代}：从$v_0 = (1, 0, 0)^\top$出发，做幂迭代$v_{k+1} = Av_k / \|Av_k\|$。手算$v_1, v_2, v_3$，以及对应的Rayleigh商$\lambda_k = v_k^\top A v_k$。
-    \item \textbf{Lanczos}：从$q_1 = v_0 / \|v_0\| = (1,0,0)^\top$出发，做Lanczos三对角化。手算3步：
-    \begin{enumerate}[label=\arabic*.]
-        \item $w_1 = Aq_1$, $\alpha_1 = q_1^\top w_1$, $w_1 \leftarrow w_1 - \alpha_1 q_1$, $\beta_1 = \|w_1\|$, $q_2 = w_1/\beta_1$
-        \item $w_2 = Aq_2 - \beta_1 q_1$, $\alpha_2 = q_2^\top w_2$, $w_2 \leftarrow w_2 - \alpha_2 q_2$, $\beta_2 = \|w_2\|$, $q_3 = w_2/\beta_2$
-        \item $w_3 = Aq_3 - \beta_2 q_2$, $\alpha_3 = q_3^\top w_3$
-    \end{enumerate}
-    写出三对角矩阵$T_3 = \begin{pmatrix}\alpha_1 & \beta_1 & 0 \\ \beta_1 & \alpha_2 & \beta_2 \\ 0 & \beta_2 & \alpha_3\end{pmatrix}$。
-    \item 求$T_3$的特征值（它们近似$A$的特征值）。与$A$的真实特征值（$\lambda \approx 0.443, 2.000, 9.557$）比较精度。
-    \item 为什么Lanczos只需$O(n)$的Hessian-vector product就能估计极端特征值？这与深度学习中用Lanczos估计Hessian谱有什么联系？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[$\star\star\star$ \textbf{Marchenko-Pastur定律验证}]
-考虑$n \times p$的矩阵$X$，其元素独立同分布于$\mathcal{N}(0, 1/n)$。样本协方差矩阵为$\hat{\Sigma} = X^\top X$。当$n, p \to \infty$，$p/n \to \gamma$时，$\hat{\Sigma}$的特征值的经验分布收敛到Marchenko-Pastur分布。
-
-取$\gamma = 0.5$（即$p = n/2$）。MP分布支撑为$[\lambda_-, \lambda_+]$，其中$\lambda_\pm = (1 \pm \sqrt{\gamma})^2$。
-\begin{subproblems}
-    \item 计算$\lambda_-$和$\lambda_+$的数值。
-    \item MP密度函数为$\rho(\lambda) = \frac{1}{2\pi \gamma \lambda}\sqrt{(\lambda_+ - \lambda)(\lambda - \lambda_-)}$。验证$\int_{\lambda_-}^{\lambda_+}\rho(\lambda)d\lambda = 1$（利用半圆的面积公式）。
-    \item 计算MP分布的均值$\mathbb{E}[\lambda] = 1$和方差$\text{Var}[\lambda] = \gamma$。
-    \item 现在加入信号：$X = U_{\text{signal}} + Z$，其中$U_{\text{signal}}$是rank-1矩阵（一个强信号方向），$Z$是噪声。$\hat{\Sigma}$的特征值分布变为"bulk + 一个outlier"。BBP相变说：只有当信号强度$\sigma^2 > \sqrt{\gamma}$时，outlier才从bulk中跳出。当$\gamma = 0.5$时，临界信号强度是多少？
-    \item 联系课程第9讲：为什么训练好的神经网络权重矩阵的奇异值分布偏离MP分布是"好事"？
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{最大流最小割：对偶完整手算}]
-考虑如下网络（$s$为源，$t$为汇）：
-\begin{center}
-\begin{tabular}{lc}
-$s \to A$: 容量 10 & $A \to B$: 容量 4 \\
-$s \to B$: 容量 8  & $A \to t$: 容量 7 \\
-$B \to A$: 容量 2  & $B \to t$: 容量 6
-\end{tabular}
-\end{center}
-\begin{subproblems}
-    \item 将最大流问题写成LP（流守恒约束+容量约束）。
-    \item 手动用增广路径法（Ford-Fulkerson）求最大流。写出每条增广路径和对应的残量图。
-    \item 写出LP的对偶问题，证明它等价于最小割问题。
-    \item 找到最小割（即将节点分为$S$和$T = V\setminus S$两组，使得$s \in S, t \in T$，横跨割的容量最小）。
-    \item 验证最大流值$=$最小割容量（强对偶/最大流最小割定理）。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[$\star\star\star$ \textbf{Viterbi算法手算}]
-隐马尔可夫模型（HMM）有3个隐状态$\{H_1, H_2, H_3\}$，2个观测值$\{O_1, O_2\}$。
-\[
-\text{转移矩阵 } A = \begin{pmatrix} 0.6 & 0.3 & 0.1 \\ 0.1 & 0.7 & 0.2 \\ 0.2 & 0.2 & 0.6 \end{pmatrix}, \quad
-\text{发射矩阵 } B = \begin{pmatrix} 0.8 & 0.2 \\ 0.3 & 0.7 \\ 0.5 & 0.5 \end{pmatrix}
-\]
-初始分布$\pi = (0.5, 0.3, 0.2)$。观测序列为$O_1, O_2, O_1, O_1$。
-\begin{subproblems}
-    \item 用Viterbi算法（动态规划）求最可能的隐状态序列。写出$\delta_t(j)$（到时刻$t$隐状态为$j$的最大概率）和$\psi_t(j)$（回溯指针）的完整表格。
-    \item 回溯得到最优路径。
-    \item 该观测序列的似然$P(O|\lambda)$是多少？（用前向算法的$\alpha_t(j)$表格计算。）
-    \item Viterbi和前向算法本质上都是DP。说明两者的状态转移方程的区别（$\max$ vs $\sum$）。
-    \item 分析该DP的反对角线并行性（能否用GPU加速？瓶颈在哪？）
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{Q-learning完整手算}]
-$3 \times 3$ GridWorld，起点$s_1$（左上），终点$s_9$（右下，奖励$+10$），$s_5$是"陷阱"（奖励$-5$）。其余步奖励$-1$。$\gamma = 0.9$，$\varepsilon = 0.1$。
-
-动作空间$\{$上、下、左、右$\}$，确定性转移（碰墙不动）。
-
-初始$Q(s,a) = 0$，学习率$\alpha = 0.5$。
-给定以下经验轨迹：
-\begin{align*}
-s_1 \xrightarrow{\text{右},r=-1} s_2 \xrightarrow{\text{右},r=-1} s_3 \xrightarrow{\text{下},r=-1} s_6 \xrightarrow{\text{下},r=-1} s_9(+10)
-\end{align*}
-\begin{subproblems}
-    \item 对轨迹中每一步做Q-learning更新：
-    \[
-    Q(s,a) \leftarrow Q(s,a) + \alpha[r + \gamma \max_{a'} Q(s',a') - Q(s,a)]
-    \]
-    从最后一步$s_6 \to s_9$开始（为什么从后往前更新等价于多次前向？），写出每次更新后变化的$Q$值。
-    \item 再给一条轨迹：$s_1 \to s_4 \to s_5(-5) \to s_6 \to s_9(+10)$。更新所有$Q$值。
-    \item 经过两条轨迹后，从$s_1$出发的$\varepsilon$-greedy策略会选什么动作？
-    \item 与SARSA的更新$Q(s,a) \leftarrow Q(s,a) + \alpha[r + \gamma Q(s',a') - Q(s,a)]$对比。如果第二条轨迹中的动作也由$\varepsilon$-greedy产生（假设$s_4$处探索选了"下"落入陷阱），SARSA的更新与Q-learning有何不同？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[$\star\star\star$ \textbf{策略梯度的方差分析}]
-考虑一个简单的MDP：$|S|=1$（只有一个状态），$|A|=3$（三个动作），奖励为$R(a_1)=1$, $R(a_2)=2$, $R(a_3)=0$（确定性）。策略用softmax参数化：
-\[
-\pi_\theta(a_k) = \frac{e^{\theta_k}}{\sum_j e^{\theta_j}}, \quad \theta = (\theta_1, \theta_2, \theta_3)
-\]
-取$\theta = (0, 0, 0)$（均匀策略）。
-\begin{subproblems}
-    \item 计算$\pi_\theta(a_k) = 1/3$，$\forall k$。
-    \item 对每个动作$a_k$，计算$\nabla_\theta \log \pi_\theta(a_k)$。
-
-    提示：$\frac{\partial \log \pi_\theta(a_k)}{\partial \theta_j} = \mathbf{1}_{j=k} - \pi_\theta(a_j)$。
-    \item 计算策略梯度的精确值：
-    \[
-    g = \mathbb{E}_{a \sim \pi}[R(a) \nabla_\theta \log \pi_\theta(a)] = \sum_k \pi_\theta(a_k) R(a_k) \nabla_\theta \log \pi_\theta(a_k)
-    \]
-    \item 计算梯度估计的方差$\text{Var}_{a \sim \pi}[R(a) \nabla_\theta \log \pi_\theta(a)]$（每个分量的方差）。
-    \item 引入baseline $b = \bar{R} = \mathbb{E}[R(a)] = 1$，重新计算策略梯度（验证期望不变）和方差（验证方差减小）。
-    \item 最优baseline $b^* = \frac{\mathbb{E}[R^2 \|\nabla \log \pi\|^2]}{\mathbb{E}[\|\nabla \log \pi\|^2]}$，计算$b^*$的值。对比$b=0$、$b=\bar{R}$和$b=b^*$三种情况的方差。
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{变分推断完整推导：高斯混合模型}]
-观测$x \in \mathbb{R}$，隐变量$z \in \{1, 2\}$表示簇归属。模型：
-\[
-p(z=k) = \pi_k, \quad p(x|z=k) = \mathcal{N}(x; \mu_k, 1)
-\]
-取$\pi_1 = \pi_2 = 0.5$, $\mu_1 = -1$, $\mu_2 = 2$。观测到$x_0 = 0.5$。
-\begin{subproblems}
-    \item 精确后验$p(z|x_0)$：用贝叶斯公式计算$p(z=1|x_0)$和$p(z=2|x_0)$。
-
-    （需要计算$\mathcal{N}(0.5; -1, 1)$和$\mathcal{N}(0.5; 2, 1)$的密度值。）
-    \item 现在考虑完整的变分推断。假设有$n=3$个观测$\mathbf{x} = (x_1, x_2, x_3) = (-0.5, 0.3, 1.8)$，隐变量$\mathbf{z} = (z_1, z_2, z_3)$。
-
-    Mean-field近似：$q(\mathbf{z}) = \prod_i q_i(z_i)$，其中$q_i(z_i = k) = r_{ik}$。
-    \item 写出ELBO：$\text{ELBO} = \sum_i \sum_k r_{ik}[\ln \pi_k + \ln \mathcal{N}(x_i;\mu_k,1) - \ln r_{ik}]$。
-    \item CAVI（坐标上升变分推断）更新：
-    \[
-    \ln r_{ik}^{\text{new}} \propto \ln \pi_k + \ln \mathcal{N}(x_i; \mu_k, 1) = \ln \pi_k - \frac{(x_i-\mu_k)^2}{2} + \text{const}
-    \]
-    然后归一化$r_{ik}$。从$r_{ik} = 0.5$出发，手算一轮CAVI更新。
-    \item 计算更新后的ELBO值，验证它增大了。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[$\star\star\star$ \textbf{Pontryagin极大原理：双积分器}]
-系统$\ddot{q} = u$（即$\dot{x}_1 = x_2, \dot{x}_2 = u$），$x_1(0) = 1, x_2(0) = 0$。目标：在$T=2$时到达$x_1(2)=0, x_2(2)=0$，最小化$J = \int_0^2 \frac{1}{2}u^2 dt$。
-\begin{subproblems}
-    \item 写出Hamiltonian $H = \frac{1}{2}u^2 + p_1 x_2 + p_2 u$。
-    \item 由$\partial H/\partial u = 0$得最优控制$u^* = -p_2$。
-    \item 写出伴随方程：$\dot{p}_1 = -\partial H/\partial x_1 = 0$, $\dot{p}_2 = -\partial H/\partial x_2 = -p_1$。求解$p_1(t), p_2(t)$。
-    \item 代入$u^* = -p_2$和状态方程，求解$x_1(t), x_2(t)$（含待定常数$p_1(0)$和$p_2(0)$）。
-    \item 利用终端条件$x_1(2) = 0, x_2(2) = 0$确定$p_1(0), p_2(0)$。
-    \item 写出最优控制$u^*(t)$和最优轨迹$x^*(t)$的显式表达式。计算最优代价$J^*$。
-    \item 该问题的HJB方程是什么形式？验证value function $V(x,t)$满足HJB方程。
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{从KKT到ADMM到分布式：完整链路}]
-考虑分布式LASSO：$K=2$个节点各持有部分数据$(A_1, b_1)$和$(A_2, b_2)$，共同求解：
-\[
-\min_w \frac{1}{2}\|A_1 w - b_1\|^2 + \frac{1}{2}\|A_2 w - b_2\|^2 + \lambda\|w\|_1
-\]
-取$A_1 = \begin{pmatrix}1 & 0\end{pmatrix}$, $b_1 = (2)$, $A_2 = \begin{pmatrix}0 & 1\end{pmatrix}$, $b_2 = (3)$, $\lambda = 0.5$。
-\begin{subproblems}
-    \item \textbf{集中式求解}：直接写KKT条件（次梯度条件），手解最优$w^*$。
-    \item \textbf{共识ADMM分解}：引入局部变量$w_1, w_2$和全局变量$z$：
-    \[
-    \min_{w_1,w_2,z} \frac{1}{2}\|A_1 w_1-b_1\|^2 + \frac{1}{2}\|A_2 w_2-b_2\|^2 + \lambda\|z\|_1 \quad \text{s.t.} \quad w_1 = z, \; w_2 = z
-    \]
-    写出ADMM的$w_1$-更新、$w_2$-更新、$z$-更新（全局软阈值）。
-    \item 取$\rho = 1$，从$z^0 = (0,0)^\top$, $u_1^0 = u_2^0 = (0,0)^\top$出发，手算3轮ADMM迭代。
-    \item 验证ADMM的解趋近于集中式的最优解$w^*$。
-    \item 在这个分解中，每个节点只需要知道什么信息？什么信息需要通信？这体现了分布式优化的什么优势？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[$\star\star\star$ \textbf{Mirror Descent完整推导}]
-在单纯形$\Delta_n = \{p \in \mathbb{R}^n : p_i \geq 0, \sum p_i = 1\}$上做在线优化。Mirror Descent使用负熵作为Bregman散度：$\Phi(p) = \sum_i p_i \ln p_i$。
-
-取$n=3$（3个专家），$\eta = 0.5$。
-\begin{subproblems}
-    \item Bregman散度$D_\Phi(p\|q) = \sum_i p_i \ln(p_i/q_i)$（即KL散度）。验证$D_\Phi$非负且当$p=q$时为零。
-    \item Mirror Descent更新：$p_{t+1} = \arg\min_{p \in \Delta_n} \left[\eta \langle \ell_t, p \rangle + D_\Phi(p \| p_t)\right]$。证明闭式解为：
-    \[
-    p_{t+1}^i = \frac{p_t^i \cdot e^{-\eta \ell_t^i}}{\sum_j p_t^j \cdot e^{-\eta \ell_t^j}}
-    \]
-    （这就是Multiplicative Weights Update！）
-    \item 从$p_1 = (1/3, 1/3, 1/3)$出发，损失向量$\ell_1 = (1, 0, 0.5)$, $\ell_2 = (0, 1, 0.5)$, $\ell_3 = (0.5, 0.5, 0)$。手算$p_2, p_3, p_4$。
-    \item 计算Regret $= \sum_t \langle \ell_t, p_t \rangle - \min_i \sum_t \ell_t^i$。
-    \item 一般Regret界为$\frac{\ln n}{\eta} + \frac{\eta T}{2}$。取$\eta = \sqrt{2\ln n / T}$可得$O(\sqrt{T \ln n})$。当$n=3, T=3$时，理论界给出多少？与你算的实际Regret比较。
-\end{subproblems}
-\end{problem}
-
-%========================================
-%========================================
-% 补充：开放研究思考题（从课内出发，通向前沿）
-%========================================
-%========================================
-\newpage
-\section*{补充：开放研究思考题}
-\addcontentsline{toc}{section}{补充：开放研究思考题}
-\setcounter{problem}{0}
-\renewcommand{\theproblem}{\arabic{problem}}
-
-\bigskip
-\begin{center}
-\textit{以下题目从课程知识出发，通过逐步诱导引向研究前沿。\\
-没有唯一标准答案，重在推理过程。鼓励查阅文献后再回头审视自己的推导。}
-\end{center}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{算力该给谁：大模型还是大Batch？}]
-你有固定的GPU预算$C$（以FLOPs计）。你可以选择模型大小$N$（参数量）和训练数据量$D$（token数）。训练的总计算量近似为$C \approx 6ND$。
-
-经验上，在充分训练后，模型的测试loss满足如下幂律关系（Scaling Law）：
-\[
-L(N, D) \approx \left(\frac{N_0}{N}\right)^{\alpha} + \left(\frac{D_0}{D}\right)^{\beta} + L_\infty
-\]
-其中$\alpha \approx 0.076$，$\beta \approx 0.095$，$L_\infty$是不可约误差，$N_0, D_0$是常数。
-\begin{subproblems}
-    \item \textbf{(从第8讲出发)} 回忆SGD在强凸函数上的收敛率$O(1/T)$和凸函数上的$O(1/\sqrt{T})$。对于固定模型，增加训练步数$T$（等价于增加$D$）的边际收益是递减的。用$L$关于$D$的幂律项$D^{-\beta}$解释这一点。
-
-    \item 现在固定总预算$C = 6ND$。将$D = C/(6N)$代入，得到$L$仅关于$N$的函数$L(N) = (N_0/N)^\alpha + (6N \cdot D_0/C)^{-\beta} + L_\infty$。对$N$求导，找到最优模型大小$N^*(C)$。证明$N^* \propto C^{\beta/(\alpha+\beta)}$。
-
-    \item 代入$\alpha=0.076, \beta=0.095$，计算$N^*$和$D^*$各随$C$的增长指数。当预算翻倍时，最优策略是模型变大多少？数据变多多少？
-
-    \item \textbf{(关键洞察)} 一个同学说："我有很多GPU，所以我把batch size开到最大，把小模型训到极致。"请用上述分析解释为什么这在经济上是次优的——同样的FLOPs花在更大的模型上，loss会更低。给出具体的数值例子：$C = 10^{21}$时，用$N=10^9$训$D=C/(6N)$的loss vs 用$N=10^{10}$训$D=C/(6N)$的loss。
-
-    \item \textbf{(更深的问题)} 第8讲说大batch训练存在"critical batch size" $B_{\text{crit}}$，超过它后加速比急剧下降。假设$B_{\text{crit}} \propto L / \|\nabla L\|^2$（梯度噪声尺度），对于loss更低的大模型，$B_{\text{crit}}$更大还是更小？这如何进一步支持"算力应给大模型"的论点？
-
-    \item \textbf{(开放)} 以上分析假设所有数据质量相同。如果数据存在质量差异（如网页爬取 vs 精心标注），Scaling Law会如何修正？你认为"数据工程"在当前范式下的价值是什么？
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{从方差传播推导初始化方法}]
-考虑$L$层全连接网络（无偏置，无BN）：$h^{(l)} = W^{(l)} \sigma(h^{(l-1)})$，其中$\sigma$是激活函数。每层宽度为$n$，$W^{(l)} \in \mathbb{R}^{n \times n}$，权重独立同分布于$\mathcal{N}(0, \sigma_w^2/n)$。
-
-\begin{subproblems}
-    \item \textbf{(前向方差传播)} 假设$h^{(0)}$的各分量独立、均值0、方差1。对于线性激活$\sigma(x) = x$，证明$\text{Var}[h_j^{(l)}] = (n \sigma_w^2)^l$（用归纳法）。要使信号不爆炸也不消失，$\sigma_w^2$应取多少？
-
-    \item \textbf{(ReLU)} 对$\sigma(x) = \max(0, x)$，计算$\mathbb{E}[\sigma(z)^2]$（$z \sim \mathcal{N}(0,1)$）。由此证明前向方差传播变为$\text{Var}[h_j^{(l)}] = \left(\frac{n \sigma_w^2}{2}\right)^l$。要保持方差不变，$\sigma_w^2$应取多少？这就是\textbf{He初始化}。
-
-    \item \textbf{(反向梯度传播)} 设loss对第$l$层输出的梯度为$\delta^{(l)}$。证明$\delta^{(l-1)} = (W^{(l)})^\top \delta^{(l)} \cdot \sigma'(h^{(l-1)})$。类似地分析$\text{Var}[\delta^{(l-1)}]$与$\text{Var}[\delta^{(l)}]$的关系。要使梯度不消失不爆炸，对$\sigma_w^2$的要求是什么？
-
-    \item \textbf{(Xavier/Glorot的折中)} 前向要求$\sigma_w^2 = 1/n_{\text{in}}$，反向要求$\sigma_w^2 = 1/n_{\text{out}}$。当$n_{\text{in}} \neq n_{\text{out}}$时，Xavier初始化取$\sigma_w^2 = 2/(n_{\text{in}} + n_{\text{out}})$作为折中。解释这个选择的合理性。
-
-    \item \textbf{(数值验证)} 取$L=50$, $n=256$。分别用$\sigma_w^2 = 1/n$（Xavier）、$\sigma_w^2 = 2/n$（He）、$\sigma_w^2 = 0.01/n$（太小）、$\sigma_w^2 = 10/n$（太大），计算第$L$层激活的理论方差。哪些会导致数值上溢或下溢？
-
-    \item \textbf{(连接第6讲：正交初始化)} 如果$W^{(l)}$是正交矩阵（$W^\top W = I$），无论多少层，线性网络的前向和反向信号都不会衰减。解释这与Stiefel流形优化的联系。正交初始化在实践中与He初始化相比有什么优劣？
-
-    \item \textbf{(开放)} Transformer中的初始化有何不同？残差连接$h^{(l)} = h^{(l-1)} + f^{(l)}(h^{(l-1)})$如何改变方差传播？如果有$L$个残差块，$f^{(l)}$的初始化尺度应该怎么随$L$调整？（提示：GPT-2使用$1/\sqrt{L}$缩放。）
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{BatchNorm到底在做什么？}]
-Batch Normalization对每层的激活做归一化：$\hat{h}_j = (h_j - \mu_B)/\sigma_B$（$\mu_B, \sigma_B$是batch内的均值和标准差），再做仿射变换$\tilde{h}_j = \gamma \hat{h}_j + \beta$。
-
-\begin{subproblems}
-    \item \textbf{(第5讲的视角：预条件)} 考虑两层线性网络$y = w_2(w_1 x)$。如果放大$w_1$为$\alpha w_1$，同时缩小$w_2$为$w_2/\alpha$，输出不变。但$\nabla_{w_1} L$会变化。证明这种"尺度不变性破坏"使得loss landscape的条件数变差。BN通过归一化消除了激活的尺度——从这个角度解释BN为什么加速训练。
-
-    \item \textbf{(Lipschitz平滑化)} 有研究表明BN的主要作用不是"减少internal covariate shift"，而是使loss landscape更加平滑（loss的梯度更Lipschitz）。回忆第5讲：$L$-光滑函数上GD的收敛率为$O(1/(LT))$。如果BN将$L$减小了一半，收敛率如何变化？这对步长选择有什么影响？
-
-    \item \textbf{(BN与batch size的纠缠)} BN的统计量$\mu_B, \sigma_B$依赖于batch。当batch size很小时，估计不准；很大时统计量稳定。回忆第8讲的大batch训练，解释为什么BN在大batch（$\geq 4096$）下反而出现问题。Group Norm和Layer Norm是如何绕开这个问题的？
-
-    \item \textbf{(开放)} 在当前的LLM训练中，几乎没有使用BatchNorm，而是用LayerNorm或RMSNorm。从"训练稳定性"和"并行友好度"两个角度分析原因。RMSNorm只保留了BN的哪一部分（均值中心化 vs 方差归一化）？为什么这就够了？
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{平坦极小值与泛化}]
-\begin{subproblems}
-    \item \textbf{(从第9讲出发)} 课程说高维loss landscape中大多数临界点是鞍点，低loss区域多是极小值。但极小值有"锐利"和"平坦"之分。直觉上解释为什么平坦的极小值（Hessian特征值小）可能泛化更好。
-
-    \item \textbf{(PAC-Bayes视角)} PAC-Bayes界说：对参数加扰动$w \to w + \epsilon$（$\epsilon \sim \mathcal{N}(0, \sigma^2 I)$），如果训练loss不变，则泛化gap小。形式化地：
-    \[
-    L_{\text{test}}(w) \leq \mathbb{E}_\epsilon[L_{\text{train}}(w+\epsilon)] + O\left(\sqrt{\frac{\|w\|^2/(2\sigma^2) + \ln n}{n}}\right)
-    \]
-    解释为什么"平坦"区域对应更好的PAC-Bayes界。
-
-    \item \textbf{(大batch vs 小batch)} 经验上，大batch SGD倾向于收敛到锐利极小值，小batch SGD倾向于收敛到平坦极小值。从SGD噪声的角度解释原因：SGD的有效噪声协方差为$\Sigma_{\text{noise}} \approx \frac{1}{B}\text{Cov}[\nabla f_i]$。$B$增大时噪声减小，为什么这会改变收敛到的极小值类型？
-
-    \item \textbf{(SAM: Sharpness-Aware Minimization)} SAM的更新公式为：
-    \[
-    w \leftarrow w - \eta \nabla_w L(w + \rho \frac{\nabla L(w)}{\|\nabla L(w)\|})\bigg|_w
-    \]
-    即先在梯度方向"走一步"扰动，再计算该处的梯度做更新。解释SAM为什么倾向于找到平坦极小值。SAM每步的计算代价是普通SGD的多少倍？
-
-    \item \textbf{(回到Scaling Law)} 如果大模型有更多的平坦极小值（过参数化使得loss landscape更"简单"），这为"大模型泛化更好"提供了另一个角度的解释。结合第9讲的过参数化隐式正则化理论，讨论模型规模与泛化的关系。
-
-    \item \textbf{(开放)} "Double Descent"现象：随着模型大小增加，测试误差先降后升（经典偏差-方差），然后在过参数化区域再次下降。你认为这与loss landscape的几何有什么关系？过参数化区域的极小值有什么特殊性质？
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{深度的表达力与优化效率}]
-\begin{subproblems}
-    \item \textbf{(表达力)} 考虑用深度$L$、宽度$n$的ReLU网络逼近函数$f(x) = x^2$在$[0,1]$上。$L=1$（一层）时需要$n$个ReLU单元达到$O(1/n^2)$的逼近误差。证明$L=O(\log(1/\epsilon))$层、$n=O(1)$宽即可达到$\epsilon$误差。（提示：$x^2$可以通过逐步"对折"逼近。）
-
-    \item \textbf{(深度矩阵分解)} 考虑矩阵补全问题：$\min_X \|P_\Omega(X - M)\|_F^2$ s.t. $\text{rank}(X) \leq k$。将$X$参数化为$X = W_L W_{L-1} \cdots W_1$（深度$L$的矩阵分解）。第9讲说深度分解有隐式正则化：
-    \[
-    \dot{\sigma}_r \propto \sigma_r^{2-2/L} \cdot \text{(gradient signal)}
-    \]
-    当$L$很大时，小奇异值$\sigma_r$的增长率远小于大奇异值。解释为什么这导致低秩偏好。
-
-    \item \textbf{(连接第6讲)} 如果我们在Stiefel流形上优化$W_l$（正交约束），$\sigma_r$全部等于1，上述隐式正则化消失。这说明什么？为什么"不对称性"对深度学习的归纳偏置很重要？
-
-    \item \textbf{(连接第9讲：NTK的局限)} NTK理论说无限宽网络等价于核方法——但核方法没有"深度优势"（特征不随训练变化）。这意味着有限宽度的特征学习（feature learning）才是深度的关键。从这个角度，NTK理论恰恰解释了"深度无用"的极限情形。讨论这对理解现实中深度网络的启示。
-
-    \item \textbf{(开放)} Transformer的depth vs width trade-off：有研究表明增加深度比增加宽度更"计算高效"。从优化和表达力两个角度分析可能的原因。
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{学习率的"相变"与Edge of Stability}]
-\begin{subproblems}
-    \item \textbf{(经典理论)} 第5讲说$L$-光滑函数上GD收敛要求步长$\eta < 2/L$（$L$是Hessian最大特征值）。证明：如果$\eta > 2/L$，则在Hessian最大特征值方向上迭代发散。
-
-    \item \textbf{(Edge of Stability现象)} 但在实践中，全batch GD训练神经网络时观察到：Hessian最大特征值$\lambda_{\max}$会自动调整到$\approx 2/\eta$附近振荡！即系统"走到稳定性的边缘"但不崩溃。这违反了经典理论——经典理论假设$L$不变，但神经网络的$L$是会变的。
-
-    从优化景观的角度解释：当$\lambda_{\max} > 2/\eta$时，最陡方向上的迭代会"弹开"，使参数移动到$\lambda_{\max}$较小的区域。这形成一种负反馈机制。画出$\lambda_{\max}$随训练的示意图。
-
-    \item \textbf{(学习率Warmup)} 训练初期loss landscape曲率很大（$\lambda_{\max}$大），直接用大学习率会发散。Warmup在前$T_w$步线性增大学习率$\eta_t = \eta_{\max} \cdot t/T_w$。从Edge of Stability的视角解释warmup的作用：给网络时间让$\lambda_{\max}$先降下来。
-
-    \item \textbf{(Cosine Decay)} 常见学习率衰减方案$\eta_t = \eta_{\min} + \frac{1}{2}(\eta_{\max} - \eta_{\min})(1 + \cos(\pi t / T))$。如果按第5讲的理论，凸函数上的最优步长衰减是$O(1/t)$或$O(1/\sqrt{t})$。Cosine Decay不属于任何一种，但在实践中更好。从"先探索后精化"的角度解释cosine schedule的设计直觉。
-
-    \item \textbf{(连接第8讲)} 回忆SGD收敛率$O(\sigma^2\eta / (1-\eta L) + (1-\eta\mu)^T)$中的两项：优化误差和统计误差。学习率大时优化快但统计误差大。推导"两阶段"策略的最优切换点：先用大$\eta$快速降低优化误差，再用小$\eta$降低统计误差。这与warmup+decay的实践做法是否一致？
-
-    \item \textbf{(开放)} 最近有研究尝试完全去掉学习率调度，用"Mechanistic Design"（如Muon优化器、Schedule-Free Adam）。你觉得学习率调度是"必须的物理"还是"工程补丁"？
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star$ \textbf{梯度裁剪的理论基础}]
-大模型训练中几乎必用梯度裁剪：$g \leftarrow g \cdot \min\left(1, \frac{c}{\|g\|}\right)$。
-\begin{subproblems}
-    \item \textbf{(第5讲视角)} 不裁剪时，梯度下降步$x \leftarrow x - \eta g$。如果$\|g\|$很大（远大于$L$-光滑性保证的范围），下降引理$f(x-\eta g) \leq f(x) - \eta\|g\|^2 + \frac{L\eta^2}{2}\|g\|^2$可能不再保证下降。解释梯度裁剪的作用：将有效步长限制为$\eta c / \|g\|$。
-
-    \item \textbf{(连接第14讲：信任域)} 注意到裁剪后的更新满足$\|x_{k+1} - x_k\| \leq \eta c$——这正是一个信任域约束！从TRPO/PPO的思路理解梯度裁剪：它是最简单的信任域方法。
-
-    \item \textbf{(实际考虑)} 在Transformer训练中，梯度裁剪阈值$c$通常设为$1.0$。如果$c$太小，训练太慢；太大，等于没裁剪。设计一个实验方案来找到最优的$c$。
-
-    \item \textbf{(开放)} 除了梯度裁剪，还有哪些手段可以稳定大模型训练？（如loss scaling、gradient accumulation、架构层面的Pre-Norm vs Post-Norm。）从优化的角度将它们统一为"控制每步更新量"的不同策略。
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{Lottery Ticket与稀疏优化}]
-\begin{subproblems}
-    \item \textbf{(Lottery Ticket假说)} 一个随机初始化的稠密网络包含一个稀疏子网络（"中奖彩票"），该子网络\emph{使用原始初始化}可以训练到与稠密网络相同的精度。这意味着什么？从第9讲的过参数化角度：稠密网络的作用是否只是提供了足够多的"彩票"供优化选择？
-
-    \item \textbf{(连接$\ell_1$正则化)} 第15讲的LASSO使用$\ell_1$范数促进稀疏。如果对网络权重加$\ell_1$正则化$\lambda\|w\|_1$，能找到"中奖彩票"吗？为什么简单的$\ell_1$在深度网络上效果不如"迭代剪枝"（train → prune → rewind → retrain）？
-
-    \item \textbf{(Mixture of Experts)} 现代LLM（如Mixtral）使用稀疏MoE：每个token只激活$k/n$的参数。这是另一种"动态稀疏性"。从计算量的角度：如果MoE有$N$个参数但每个token只用$N/8$个，训练FLOPs接近$N/8$的稠密模型，但表达力接近$N$。结合Scaling Law讨论：MoE是否改变了$N$-$D$-$C$的最优分配？
-
-    \item \textbf{(开放)} 人脑有$\sim 10^{11}$个神经元，但同一时刻只有$\sim 1\%$在活跃放电。讨论生物稀疏性与Lottery Ticket/MoE之间可能的联系。
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{当奖励模型骗了你：Goodhart定律的优化解读}]
-RLHF中，我们用PPO优化一个学习到的奖励模型$r_\phi(x,y)$（$x$是prompt，$y$是response）。
-\begin{subproblems}
-    \item \textbf{(第14讲出发)} PPO优化的目标是$\max_\theta \mathbb{E}_{x,y\sim\pi_\theta}[r_\phi(x,y)] - \beta D_{KL}(\pi_\theta \| \pi_{\text{ref}})$。如果没有KL惩罚（$\beta = 0$），会发生什么？$\pi_\theta$会如何利用$r_\phi$的漏洞？
-
-    \item \textbf{(Reward Hacking)} 奖励模型$r_\phi$是在有限数据上训练的，在分布外（out-of-distribution）区域不可靠。当$\pi_\theta$偏离$\pi_{\text{ref}}$太远时，它可能找到$r_\phi$很高但人类评价很低的response。画出示意图：横轴为$D_{KL}(\pi_\theta \| \pi_{\text{ref}})$，纵轴分别为$r_\phi$（proxy reward）和真实人类偏好（true reward）。两条曲线在什么区域开始分叉？
-
-    \item \textbf{(连接第2讲：约束优化)} 从KKT的角度重新理解$\beta$：它是KL约束$D_{KL} \leq \delta$的对偶变量。$\beta$太小$\Leftrightarrow$约束太松$\Leftrightarrow$reward hacking。$\beta$太大$\Leftrightarrow$约束太紧$\Leftrightarrow$策略几乎不更新。最优的$\beta$对应什么？（互补松弛条件意味着什么？）
-
-    \item \textbf{(DPO: 绕开RL)} Direct Preference Optimization直接优化偏好数据，不需要训练显式的奖励模型，也不需要PPO。其关键观察是：最优策略$\pi^*$和奖励$r$之间有闭式关系$r(x,y) = \beta \log \frac{\pi^*(y|x)}{\pi_{\text{ref}}(y|x)} + \beta \log Z(x)$。因此可以将$r$消去，直接用偏好对$(y_w \succ y_l)$优化$\pi$。
-
-    从优化复杂度的角度比较PPO和DPO：PPO需要4个模型（policy, reference, reward, value），DPO只需要2个（policy, reference）。这对GPU显存意味着什么？
-
-    \item \textbf{(开放)} 你认为"对齐税"（alignment tax）——即对齐后模型在基准测试上的能力下降——是不可避免的吗？从多目标优化的帕累托前沿角度分析"能力"和"安全"之间的trade-off。
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{Attention为什么有效，以及如何加速它}]
-自注意力机制：$\text{Attn}(Q,K,V) = \text{softmax}(QK^\top / \sqrt{d_k})V$，其中$Q,K,V \in \mathbb{R}^{n \times d_k}$。
-\begin{subproblems}
-    \item \textbf{(第7讲视角：低秩近似)} 注意力矩阵$A = \text{softmax}(QK^\top/\sqrt{d_k})$是$n \times n$的。如果$A$近似低秩（少数几个token主导注意力），那么$AV$可以用随机化方法近似。设$A$的有效秩为$k \ll n$，估计近似计算的加速比。
-
-    \item \textbf{(IO复杂度)} 第16讲的FlashAttention的核心洞察不是减少FLOPs，而是减少HBM（高带宽内存）访问。标准Attention需要将$n \times n$的注意力矩阵写入HBM再读出做$\times V$。FlashAttention通过分块计算（tiling），在SRAM中完成softmax和$\times V$，只写最终结果到HBM。
-
-    假设SRAM大小$M$，矩阵$Q,K,V$各$n \times d$。标准Attention的HBM访问量为$O(nd + n^2)$，FlashAttention为$O(n^2 d^2/M)$。当$d^2 < M$（通常成立，$d=64$, $M \sim 10^5$）时，FlashAttention的IO复杂度近似$O(n^2 d^2/M)$。与标准的$O(n^2)$比较，加速因子是什么？
-
-    \item \textbf{(连接第4讲：分治)} KV-Cache在自回归生成中缓存已计算的$K,V$。生成第$t$个token时，只需计算新的$q_t$与所有历史$K_{1:t}$的注意力。这将生成$n$个token的复杂度从$O(n^3 d)$降到$O(n^2 d)$。推导这个结果。
-
-    \item \textbf{(稀疏注意力)} 如果限制每个token只关注$k$个最近的token（sliding window）加上$s$个全局token，注意力矩阵变成稀疏的。计算FLOPs从$O(n^2 d)$降到多少？这对长文本（$n > 100000$）意味着什么？
-
-    \item \textbf{(开放)} 近年来有很多"线性注意力"工作（如Mamba, RWKV），将$O(n^2)$降到$O(n)$。但它们在某些任务上不如标准Transformer。你认为$O(n^2)$的注意力捕获了什么是$O(n)$架构难以捕获的？从"表达力 vs 效率"的trade-off讨论。
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star\star$ \textbf{为什么大模型会"涌现"新能力？}]
-\begin{subproblems}
-    \item \textbf{(相变的类比)} 第1讲讨论了计算复杂性中的相变（如随机SAT在子句密度$m/n \approx 4.27$处从几乎全可满足变为几乎全不可满足）。类似地，LLM在模型规模增大时，某些能力（如思维链推理、多位数加法）似乎"突然出现"。
-
-    从优化的角度思考：如果某个能力需要网络学到一个特定的"电路"（子网络），而这个电路需要最少$N_{\min}$个参数才能表达，那么在$N < N_{\min}$时loss在该任务上无法下降，$N > N_{\min}$时loss突然可以下降。画出"某任务的loss vs 模型大小"的示意图。
-
-    \item \textbf{(Grokking)} 另一个"相变"现象：网络先记住训练数据（过拟合），很久之后突然学会泛化规律（grokking）。从隐式正则化的角度：GD的轨迹先到达一个"记忆解"（高复杂度），然后缓慢漂移到"泛化解"（低复杂度）。这与第9讲的最小范数偏好有什么联系？
-
-    \item \textbf{(连接第11讲：探索-利用)} 如果将训练过程类比为Bandit问题：模型在"简单特征"和"复杂特征"之间分配"学习容量"。训练初期利用简单特征就能降loss（exploitation），后期需要发现更复杂的模式（exploration）。学习率调度是否可以理解为控制这种探索-利用的balance？
-
-    \item \textbf{(开放)} "涌现"是真实的还是度量（metric）的假象？有研究指出如果用连续的loss（而非accuracy这样的阈值度量），"涌现"变成了平滑的改进。你如何设计实验来区分"真正的相变"和"度量假象"？
-\end{subproblems}
-\end{problem}
-
-%--------------------------------------------------
-%--------------------------------------------------
-
-\begin{problem}[$\star\star$ \textbf{推理比训练更重要：推理优化的数学}]
-训练一个LLM花费$C_{\text{train}}$，但部署后每个query的推理成本$c_{\text{infer}}$会被调用$Q$次。总成本$C_{\text{total}} = C_{\text{train}} + Q \cdot c_{\text{infer}}$。
-\begin{subproblems}
-    \item 当$Q > C_{\text{train}} / c_{\text{infer}}$时，推理成本主导。对GPT-4量级（$C_{\text{train}} \sim 10^{25}$ FLOPs, $Q \sim 10^{12}$ queries），估算$c_{\text{infer}}$的临界值。
-
-    \item \textbf{(量化)} 将FP16权重量化到INT4，理论上推理速度提升多少？（考虑带宽瓶颈：自回归生成是memory-bandwidth bound，速度$\propto$模型大小/内存带宽。）权重从2字节变为0.5字节，速度提升约$4\times$。但量化带来精度损失。从第7讲的随机化视角：量化可以看作一种"有偏sketching"。如何用随机舍入（stochastic rounding）减小偏差？
-
-    \item \textbf{(Speculative Decoding)} 用一个小模型（draft model）快速生成$k$个候选token，再用大模型（target model）并行验证。如果小模型的接受率为$\alpha$，期望每次验证通过的token数为$k\alpha$。总加速比近似$k\alpha / (c_{\text{draft}} \cdot k + c_{\text{target}})$。如果$c_{\text{draft}} = c_{\text{target}}/10$, $\alpha = 0.8$, $k=5$，计算加速比。
-
-    \item \textbf{(连接第4讲)} 自回归生成本质上是顺序的（第$t$个token依赖第$t-1$个）。这与第4讲中"贪心算法的GPU困境"类似。Speculative Decoding是如何"打破"这种顺序依赖的？从分治法的"投机执行"（speculative execution）角度理解。
-
-    \item \textbf{(开放)} "Test-time compute"（如OpenAI o1的思维链推理）用更多推理计算换取更好的回答。从在线优化的角度：这相当于在推理时做额外的"搜索"。你认为训练计算和推理计算之间存在Scaling Law吗？
-\end{subproblems}
-\end{problem}
-
 \end{document}
