@@ -1326,6 +1326,28 @@ v_{t+1} = \mu v_t - \eta \nabla f(x_t + \mu v_t), \quad x_{t+1} = x_t + v_{t+1}
 \end{problem}
 
 %--- 第9讲 ---
+
+
+% 从用户补充材料归并
+\begin{problem}[综合题 $\star\star\star$ \textbf{随机梯度流的稳态与尺度规律}]
+考虑线性回归数据模型：$\bm x\sim\mathcal N(\bm 0,\Sigma_{data})$，
+$y=\bm x^\top \bm w^*+\epsilon$，$\epsilon\sim\mathcal N(0,\sigma_\epsilon^2)$ 且与 $\bm x$ 独立。
+经验损失为
+\[
+L(\bm w)=\frac{1}{2B}\sum_{i=1}^B(\bm x_i^\top\bm w-y_i)^2.
+\]
+\begin{subproblems}
+    \item 严格推导在 $\bm w=\bm w^*$ 处的单样本梯度噪声协方差 $\Sigma_{grad}$，并说明它与 $\Sigma_{data}$ 的谱关系（“谱塑形”）。
+    \item 设SGD误差递推为
+    \[
+    \bm e_{t+1}=(I-\eta H)\bm e_t-\eta\bm\xi_{B,t},\quad H:=\Sigma_{data},
+    \]
+    在小步长近似下推导稳态二阶矩 $M=\E[\bm e\bm e^\top]$ 的Lyapunov方程，并给出
+    $\E\|\bm w_\infty-\bm w^*\|^2$ 对 $(\eta,B,\sigma_\epsilon^2,d)$ 的一阶近似表达。
+    \item 由上问结果推导 batch 从 $B$ 放大到 $kB$ 时保持稳态误差不变的学习率缩放律；并给出该线性缩放失效的稳定性阈值（用 $\lambda_{\max}(H)$ 表示）。
+\end{subproblems}
+\end{problem}
+
 \section{第9讲：深度学习优化理论}
 
 \begin{problem}[概念题 $\star$]
@@ -1601,6 +1623,21 @@ Batch Normalization对每层的激活做归一化：$\hat{h}_j = (h_j - \mu_B)/\
     \item \textbf{(开放)} "Test-time compute"（如OpenAI o1的思维链推理）用更多推理计算换取更好的回答。从在线优化的角度：这相当于在推理时做额外的"搜索"。你认为训练计算和推理计算之间存在Scaling Law吗？
 \end{subproblems}
 \end{problem}
+
+
+% 从用户补充材料归并
+\begin{problem}[综合题 $\star\star\star$ \textbf{深层网络中的曲率与信号稳定性}]
+考虑两类模型：
+(i) 标量深层乘积网络 $f(\bm w)=(\prod_{l=1}^L w_l)x$（取 $x=1$），损失 $\mathcal L=\frac12(f-1)^2$；
+(ii) ReLU前向传播 $h_{l+1}=\mathrm{ReLU}(W_lh_l)$，$W_l(i,j)\sim\mathcal N(0,\sigma^2)$。
+\begin{subproblems}
+    \item 对模型(i)严格推导 Hessian 对角项 $H_{ii}$ 的闭式表达；当 $w_l=w_0$ 时，分析其随深度 $L$ 的数量级。
+    \item 对模型(ii)设 $q_l:=\E[h_{l,j}^2]$，利用
+    $\E[\mathrm{ReLU}(z)^2]=\frac12\E[z^2]$，推导方差递推 $q_{l+1}$ 与临界初始化方差 $\sigma_{crit}^2$。
+    \item 若采用 Xavier 方差 $\sigma^2=1/n$，推导 $q_L/q_0$ 的衰减规律，并讨论 warmup 为什么只能缓解优化初期不稳定、却不能从根本上解决前向信号衰减。
+\end{subproblems}
+\end{problem}
+
 \section{第10讲：变分法与最优控制}
 
 \begin{problem}[概念题 $\star$]
@@ -2340,6 +2377,22 @@ RLHF中，我们用PPO优化一个学习到的奖励模型$r_\phi(x,y)$（$x$是
     \item \textbf{(开放)} 你认为"对齐税"（alignment tax）——即对齐后模型在基准测试上的能力下降——是不可避免的吗？从多目标优化的帕累托前沿角度分析"能力"和"安全"之间的trade-off。
 \end{subproblems}
 \end{problem}
+
+
+% 从用户补充材料归并
+\begin{problem}[综合题 $\star\star\star$ \textbf{强化学习的收缩性、有限样本与信任域}]
+设 Bellman 最优算子
+\[
+(\mathcal TV)(s)=\max_{a\in A}\left[R(s,a)+\gamma\sum_{s'\in S}P(s'|s,a)V(s')\right],\quad 0\le\gamma<1.
+\]
+\begin{subproblems}
+    \item 严格证明 $\mathcal T$ 在 $\|\cdot\|_\infty$ 下是 $\gamma$-收缩映射，并据此说明值迭代收敛到唯一不动点 $V^*$。
+    \item 对固定 $(s,a)$，用 Hoeffding 不等式推导采样Bellman备份
+    $\widehat{\mathcal T}$ 与精确备份 $\mathcal T$ 的高概率误差界；要求写出关于样本数 $N$、动作数 $|A|$、值函数上界 $V_{\max}$ 的显式界。
+    \item 从二阶近似角度解释 PPO 裁剪（或KL约束）为何可被视作在 Fisher 度量下限制步长，并说明在 RLHF 场景中该“信任域”机制为何更关键。
+\end{subproblems}
+\end{problem}
+
 \section{第15讲：分布式优化}
 
 \begin{problem}[概念题 $\star$]
