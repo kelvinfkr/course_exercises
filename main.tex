@@ -41,7 +41,7 @@
 
 % 习题环境
 \newcounter{problem}[section]
-\renewcommand{\theproblem}{\thesection.\arabic{problem}}
+\renewcommand{\theproblem}{\arabic{problem}}
 
 \newenvironment{problem}[1][]{%
     \refstepcounter{problem}%
@@ -203,6 +203,39 @@ S_1 = \{1,2,3\}, \quad S_2 = \{2,4\}, \quad S_3 = \{3,5\}, \quad S_4 = \{4,5,6\}
 %========================================
 % 第2章
 %========================================
+
+% --- 按章节归并的补充题 ---
+\subsection*{补充编程题}
+\subsection*{第1讲：计算复杂性}
+
+\begin{problem}[$\star$]
+\textbf{暴力 vs 贪心 vs 2-opt：TSP实验}
+
+生成$n$个二维平面上的随机点作为城市。分别实现：
+\begin{subproblems}
+    \item \textbf{暴力搜索}：遍历所有排列，找最短路径。用 \texttt{itertools.permutations} 即可。
+    \item \textbf{贪心}：每次走到最近的未访问城市。
+    \item \textbf{2-opt}：从贪心解出发，反复尝试翻转子路径，直到无法改进。
+\end{subproblems}
+分别在$n=8,10,12$上运行，记录运行时间和路径长度。画表格比较三者。$n=12$时暴力法要多久？
+
+\begin{hint}
+2-opt的核心循环：对所有$(i,j)$对，检查将路径$[i..j]$翻转后总长度是否减小。
+\end{hint}
+\end{problem}
+
+\begin{problem}[$\star$]
+\textbf{SAT求解器体验}
+
+用Python实现一个暴力SAT求解器：输入CNF公式（子句列表），枚举所有$2^n$种变量赋值，检查是否满足。
+\begin{subproblems}
+    \item 对以下CNF公式求解：$(x_1 \lor x_2) \land (\neg x_1 \lor x_3) \land (\neg x_2 \lor \neg x_3)$。
+    \item 随机生成含$n$个变量、$m$个子句（每个子句3个文字）的3-SAT实例。测试$n=10,15,20$时的求解时间。
+    \item 固定$n=20$，画出"可满足概率"随$m/n$比值变化的曲线（子句密度相变现象）。
+\end{subproblems}
+\end{problem}
+
+%--- 第2讲 ---
 \section{第2讲：凸优化与KKT}
 
 \begin{problem}[概念题 $\star$]
@@ -267,791 +300,9 @@ S_1 = \{1,2,3\}, \quad S_2 = \{2,4\}, \quad S_3 = \{3,5\}, \quad S_4 = \{4,5,6\}
 %========================================
 % 第3章
 %========================================
-\section{第3讲：LP对偶与近似算法}
 
-\begin{problem}[概念题 $\star$]
-写出线性规划标准形及其对偶问题：
-\begin{subproblems}
-    \item 原问题：$\min c^\top x$ s.t. $Ax = b$, $x \geq 0$
-    \item 对偶问题是什么？
-    \item 写出LP对偶的机械化构造规则。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-考虑以下线性规划问题：
-\[
-\max \quad 3x_1 + 5x_2 \quad \text{s.t.} \quad x_1 \leq 4, \quad 2x_2 \leq 12, \quad 3x_1 + 5x_2 \leq 25, \quad x_1, x_2 \geq 0
-\]
-\begin{subproblems}
-    \item 写出该问题的对偶问题。
-    \item 利用互补松弛条件和对偶可行性，求解原问题和对偶问题的最优解。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[证明题 $\star\star$]
-证明LP的强对偶定理（假设原问题有有界最优解）：原问题最优值等于对偶问题最优值，即$p^* = d^*$。
-\begin{hint}
-可以使用超平面分离定理或Farkas引理。
-\end{hint}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-\textbf{LP松弛与近似}。考虑最小顶点覆盖问题（Minimum Vertex Cover）：给定图$G=(V,E)$，其整数规划形式为：
-\[
-\min \sum_{v \in V} x_v \quad \text{s.t.} \quad x_u + x_v \geq 1, \forall (u,v)\in E, \quad x_v \in \{0,1\}
-\]
-\begin{subproblems}
-    \item 写出其LP松弛（将$x_v \in \{0,1\}$放宽为$0 \leq x_v \leq 1$）。
-    \item 描述LP松弛舍入算法：$x_v^{LP} \geq 1/2$则取$x_v = 1$，否则$x_v = 0$。
-    \item 证明这个舍入方案给出2-近似：$\text{ALG} \leq 2 \cdot \text{OPT}$。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star\star$]
-简述Goemans-Williamson算法求解Max-Cut问题的思想：
-\begin{subproblems}
-    \item 写出Max-Cut的SDP松弛。
-    \item 解释随机超平面舍入（random hyperplane rounding）的思想。
-    \item 为什么近似比是$0.878 \approx \min_{0 \leq \theta \leq \pi} \frac{2}{\pi} \cdot \frac{\theta}{1 - \cos\theta}$？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[思考题 $\star\star$]
-为什么在GPU时代，用于求解大规模LP的一阶方法（如PDHG）正在复兴？请从以下角度分析：
-\begin{subproblems}
-    \item 单纯形法和内点法各自的瓶颈是什么？
-    \item PDHG（Primal-Dual Hybrid Gradient）为什么适合GPU？
-    \item 在什么规模/结构的LP问题上，GPU一阶方法更有优势？
-\end{subproblems}
-\end{problem}
-
-%========================================
-% 第4章
-%========================================
-\section{第4讲：算法设计范式与GPU化}
-
-\begin{problem}[概念题 $\star$]
-分治法的三个步骤是什么？写出分治法的时间复杂度递推关系的一般形式$T(n) = aT(n/b) + f(n)$，并说明Master定理的三种情况。
-\end{problem}
-
-\begin{problem}[计算题 $\star$]
-使用Master定理分析以下递推的时间复杂度：
-\begin{subproblems}
-    \item $T(n) = 2T(n/2) + O(n)$（归并排序）
-    \item $T(n) = 8T(n/2) + O(n^2)$（朴素矩阵乘法）
-    \item $T(n) = 7T(n/2) + O(n^2)$（Strassen算法）
-    \item $T(n) = 2T(n/2) + O(n \log n)$
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-动态规划需要满足两个条件：\textbf{最优子结构}和\textbf{重叠子问题}。
-\begin{subproblems}
-    \item 分别解释这两个条件的含义。
-    \item 为什么贪心算法不需要"重叠子问题"？
-    \item 动态规划和分治法的核心区别是什么？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-考虑编辑距离问题：将字符串$s_1$变为$s_2$的最小操作数（插入、删除、替换各花费1）。
-\begin{subproblems}
-    \item 写出状态转移方程$dp[i][j]$。
-    \item 计算"kitten"和"sitting"的编辑距离。
-    \item 该DP算法的时间和空间复杂度分别是多少？
-    \item 解释如何利用GPU的对角线并行（wavefront并行）来加速编辑距离的计算。为什么同一条反对角线上的元素可以并行计算？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[证明题 $\star\star$]
-\textbf{贪心算法的交换论证}。考虑活动选择问题：给定$n$个活动，每个活动有开始时间$s_i$和结束时间$f_i$。请用交换论证（exchange argument）证明：按结束时间最早贪心选择可以得到最优解。
-\end{problem}
-
-\begin{problem}[思考题 $\star\star\star$]
-GPU暴力法的"逆袭"：
-\begin{subproblems}
-    \item 对于Two Sum问题（在数组中找两个数使得和为目标值），哈希表解法的复杂度是$O(n)$。GPU暴力解法检查所有$O(n^2)$对，但可以完全并行化。在什么规模的$n$下，GPU暴力可能更快？解释原因。
-    \item 更一般地，讨论"顺序依赖性"如何影响算法的GPU可并行化程度。将分治、DP、贪心三种范式按GPU友好程度排序并解释原因。
-\end{subproblems}
-\end{problem}
-
-%========================================
-% 第5章
-%========================================
-\section{第5讲：梯度法与预条件}
-
-\begin{problem}[概念题 $\star$]
-写出梯度下降法的迭代公式，并解释为什么负梯度方向是局部最速下降方向。
-\end{problem}
-
-\begin{problem}[计算题 $\star$]
-考虑函数$f(x_1, x_2) = 2x_1^2 + x_2^2 - 2x_1x_2 + 4x_1 - 6x_2$。
-\begin{subproblems}
-    \item 计算梯度$\nabla f$和Hessian矩阵$H$。
-    \item 验证$f$是强凸函数。
-    \item 求$f$的最小值点（令$\nabla f = 0$）。
-    \item 计算条件数$\kappa = \lambda_{\max}(H)/\lambda_{\min}(H)$，并解释它对梯度下降收敛速度的影响。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[证明题 $\star\star$]
-证明梯度下降法在$L$-光滑凸函数上的收敛速率。具体来说，设$f$是凸函数且$\nabla f$是$L$-Lipschitz的（即$\|\nabla f(x) - \nabla f(y)\| \leq L\|x - y\|$），步长$\eta = 1/L$。证明：
-\[
-f(x_T) - f(x^*) \leq \frac{L\|x_0 - x^*\|^2}{2T}
-\]
-\begin{hint}
-先证明descent lemma: $f(y) \leq f(x) + \nabla f(x)^\top(y-x) + \frac{L}{2}\|y-x\|^2$。
-\end{hint}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-\textbf{条件数的影响}。考虑二次函数$f(x) = \frac{1}{2}x^\top A x - b^\top x$，其中
-\[
-A = \begin{pmatrix} 100 & 0 \\ 0 & 1 \end{pmatrix}, \quad b = \begin{pmatrix} 100 \\ 1 \end{pmatrix}
-\]
-\begin{subproblems}
-    \item 计算最优解$x^*$和条件数$\kappa$。
-    \item 梯度下降从$x_0 = (0,0)^\top$出发，步长$\eta = 1/\lambda_{\max}(A) = 0.01$。写出前3步的迭代过程。
-    \item 对于强凸函数，梯度下降的收敛率为$O\left(\left(\frac{\kappa-1}{\kappa+1}\right)^T\right)$。当$\kappa = 100$时，需要大约多少步使得误差缩小到初始的$1/e$？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-比较以下优化方法，填表：
-\begin{center}
-\begin{tabular}{l|c|c|c}
-\toprule
-方法 & 每步复杂度 & 收敛速度 & GPU友好度 \\
-\midrule
-梯度下降 & & & \\
-牛顿法 & & & \\
-L-BFGS & & & \\
-对角预条件(Adam) & & & \\
-\bottomrule
-\end{tabular}
-\end{center}
-并解释为什么在GPU时代，"一阶方法+简单预条件"往往优于"二阶方法"。
-\end{problem}
-
-\begin{problem}[计算题 $\star\star\star$]
-\textbf{牛顿法}。考虑$f(x) = e^x + e^{-x}$。
-\begin{subproblems}
-    \item 计算$f'(x)$和$f''(x)$。
-    \item 写出牛顿法迭代公式：$x_{k+1} = x_k - \frac{f'(x_k)}{f''(x_k)}$。
-    \item 从$x_0 = 1$出发，计算前3步迭代的值。
-    \item 解释为什么牛顿法具有局部二次收敛性（即$|x_{k+1} - x^*| \leq C|x_k - x^*|^2$）。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[思考题 $\star\star$]
-预条件的本质是"椭圆变圆"。
-\begin{subproblems}
-    \item 解释预条件梯度下降$x \leftarrow x - \eta P^{-1}\nabla f(x)$中$P$的作用。理想情况下$P$应该选什么？
-    \item 为什么在实践中不直接用$P = H$（Hessian矩阵）？
-    \item GPU友好的预条件谱系为：对角 $\to$ 块对角 $\to$ Kronecker $\to$ 低秩。解释这个谱系中"结构化 = 可并行"的含义。
-\end{subproblems}
-\end{problem}
-
-%========================================
-% 第6章
-%========================================
-\section{第6讲：流形优化}
-
-\begin{problem}[概念题 $\star$]
-什么是光滑流形（smooth manifold）？直观地解释"局部像欧氏空间"的含义。列举三个在优化中常见的流形及其约束条件。
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-解释以下流形优化中的核心概念：
-\begin{subproblems}
-    \item 切空间（tangent space）$T_x\mathcal{M}$
-    \item Riemannian梯度（Riemannian gradient）
-    \item Retraction映射$R_x: T_x\mathcal{M} \to \mathcal{M}$
-    \item 欧氏梯度与Riemannian梯度之间的关系
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-考虑单位球面$S^{n-1} = \{x \in \mathbb{R}^n : \|x\|_2 = 1\}$上的优化问题：
-\[
-\min_{x \in S^{n-1}} f(x) = x^\top A x
-\]
-其中$A$是对称矩阵。
-\begin{subproblems}
-    \item $S^{n-1}$上点$x$处的切空间$T_x S^{n-1}$是什么？
-    \item 将欧氏梯度$\nabla f(x) = 2Ax$投影到切空间，得到Riemannian梯度。
-    \item 写出球面上的retraction映射（归一化投影）。
-    \item 这个优化问题的最优解是什么？（与$A$的特征值/特征向量有什么关系？）
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star\star$]
-\textbf{Stiefel流形}$\text{St}(n,p) = \{W \in \mathbb{R}^{n \times p} : W^\top W = I_p\}$。
-\begin{subproblems}
-    \item 证明$W$处的切空间为$T_W \text{St}(n,p) = \{\Delta : W^\top \Delta + \Delta^\top W = 0\}$。
-    \item 给定欧氏梯度$G = \nabla f(W)$，Riemannian梯度为$\text{grad} f(W) = G - W(W^\top G + G^\top W)/2$。验证$\text{grad} f(W) \in T_W \text{St}(n,p)$。
-    \item 简述QR-based retraction的计算过程：$R_W(\eta) = \text{qf}(W + \eta)$。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[思考题 $\star\star$]
-流形优化 vs 惩罚法：
-\begin{subproblems}
-    \item 用惩罚法处理正交约束$W^\top W = I$，写出目标函数$\tilde{f}(W) = f(W) + \frac{\mu}{2}\|W^\top W - I\|_F^2$的形式。这种方法有什么问题？
-    \item 流形优化的优势是什么？为什么说它是"在约束空间上直接优化"？
-    \item 举一个流形优化在深度学习中的应用（如正交RNN），并解释为什么正交约束可以缓解梯度消失问题。
-\end{subproblems}
-\end{problem}
-
-%========================================
-% 第7章
-%========================================
-\section{第7讲：随机化算法}
-
-\begin{problem}[概念题 $\star$]
-叙述Johnson-Lindenstrauss引理：对于$n$个点$x_1, \ldots, x_n \in \mathbb{R}^d$和$0 < \varepsilon < 1$，存在映射$f: \mathbb{R}^d \to \mathbb{R}^k$（$k = O(\log n / \varepsilon^2)$），使得对所有$i, j$：
-\[
-(1 - \varepsilon)\|x_i - x_j\|^2 \leq \|f(x_i) - f(x_j)\|^2 \leq (1 + \varepsilon)\|x_i - x_j\|^2
-\]
-解释这个引理的意义：为什么投影维度$k$与原始维度$d$无关？
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-\textbf{随机矩阵乘法}。给定$A \in \mathbb{R}^{m \times n}$和$B \in \mathbb{R}^{n \times p}$，随机采样$k$列的近似乘法为$AB \approx CR$，其中：
-\begin{subproblems}
-    \item 描述按列范数比例采样的策略：$P(j \text{ 被选中}) = \frac{\|A_{:,j}\|\|B_{j,:}\|}{\sum_l \|A_{:,l}\|\|B_{l,:}\|}$。
-    \item 证明该估计是无偏的：$\mathbb{E}[CR] = AB$。
-    \item 如果$A$是$10000\times 5000$，$B$是$5000\times 8000$，精确乘法需要多少次浮点运算？采样$k=500$列时需要多少次？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-\textbf{Sketch-and-Solve}用于随机最小二乘。考虑$\min_x \|Ax - b\|_2$，其中$A \in \mathbb{R}^{n \times d}$，$n \gg d$。
-\begin{subproblems}
-    \item Sketch-and-Solve方法将问题转化为$\min_x \|SAx - Sb\|_2$，其中$S \in \mathbb{R}^{k \times n}$是sketching矩阵。$k$一般选多大？
-    \item 列举两种常用的sketching矩阵（如高斯随机矩阵、CountSketch）。
-    \item 解释为什么这种方法可以将时间从$O(nd^2)$降到$O(\text{nnz}(A) \cdot d + d^3)$。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star\star$]
-\textbf{随机SVD}。给定矩阵$A \in \mathbb{R}^{m \times n}$，要求其top-$k$奇异值和奇异向量。
-\begin{subproblems}
-    \item 描述随机SVD算法的步骤：
-    \begin{enumerate}[label=\arabic*.]
-        \item 生成随机矩阵$\Omega \in \mathbb{R}^{n \times (k+p)}$
-        \item 计算$Y = A\Omega$
-        \item 对$Y$做QR分解$Y = QR$
-        \item 计算$B = Q^\top A$
-        \item 对$B$做SVD
-    \end{enumerate}
-    \item 解释为什么$Q$的列空间近似$A$的top-$k$左奇异向量张成的空间。
-    \item 该算法的时间复杂度是多少？与精确SVD（$O(mn\min(m,n))$）相比有何优势？
-    \item 过采样参数$p$（一般取$5 \sim 10$）的作用是什么？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[思考题 $\star\star$]
-解释"随机化让不可能变可能"这一观点。以$50000 \times 50000$矩阵的top-100 SVD为例，精确SVD需要的内存和时间分别是多少？随机SVD如何解决这个问题？
-\end{problem}
-
-%========================================
-% 第8章
-%========================================
-\section{第8讲：随机优化}
-
-\begin{problem}[概念题 $\star$]
-写出随机梯度下降（SGD）的更新公式，并证明SGD的梯度估计是无偏的：$\mathbb{E}[\nabla f_i(x)] = \nabla f(x)$，其中$f(x) = \frac{1}{n}\sum_{i=1}^n f_i(x)$。
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-\textbf{Mini-batch方差分析}。设全梯度$\nabla f(x) = \frac{1}{n}\sum_{i=1}^n \nabla f_i(x)$，单个样本梯度的方差为$\text{Var}[\nabla f_i(x)] = \sigma^2$。
-\begin{subproblems}
-    \item 计算mini-batch（大小为$b$）梯度估计的方差$\text{Var}\left[\frac{1}{b}\sum_{j=1}^b \nabla f_{i_j}(x)\right]$。
-    \item 当$b$增大$k$倍时，方差缩小多少倍？计算量增加多少倍？
-    \item 为什么说存在一个"最优batch size"的trade-off？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[证明题 $\star\star$]
-证明SGD在凸、$L$-光滑函数上，使用步长$\eta_t = \frac{c}{\sqrt{T}}$（常数步长缩减方案）的收敛速率为$O(1/\sqrt{T})$。
-\begin{hint}
-使用SGD更新的递推：$\mathbb{E}\|x_{t+1} - x^*\|^2 \leq \mathbb{E}\|x_t - x^*\|^2 - 2\eta_t(f(x_t) - f(x^*)) + \eta_t^2 \sigma^2$。
-\end{hint}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-\textbf{Adam优化器}。写出Adam的完整更新公式：
-\begin{subproblems}
-    \item 一阶矩估计$m_t$和二阶矩估计$v_t$的更新公式。
-    \item 偏差修正$\hat{m}_t$和$\hat{v}_t$。
-    \item 参数更新公式。
-    \item 解释为什么Adam可以看作"对角预条件+动量"。预条件矩阵是什么？
-    \item Adam的默认超参数$\beta_1, \beta_2, \epsilon$通常取什么值？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-比较以下优化器的特点：
-\begin{subproblems}
-    \item SGD vs SGD+Momentum：动量的物理直觉是什么？
-    \item Momentum vs Nesterov Momentum：Nesterov的"先预测再求梯度"有什么好处？
-    \item Adam vs AdamW：AdamW中的weight decay和L2正则化有什么区别？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[思考题 $\star\star\star$]
-\textbf{大Batch训练}。
-\begin{subproblems}
-    \item 解释为什么简单地增大batch size并线性增大学习率可能导致训练不稳定。
-    \item LARS（Layer-wise Adaptive Rate Scaling）的核心思想是什么？
-    \item 从GPU利用率的角度，解释为什么batch=32时GPU利用率只有30\%，而batch=512时可以达到90\%。
-    \item "小batch浪费GPU"这个观点与"大batch泛化性差"之间如何权衡？
-\end{subproblems}
-\end{problem}
-
-%========================================
-% 第9章
-%========================================
-\section{第9讲：深度学习优化理论}
-
-\begin{problem}[概念题 $\star$]
-解释"过参数化悖论"：为什么参数量远大于数据量的深度网络不会严重过拟合？经典学习理论对此有什么预测？实际情况如何？
-\end{problem}
-
-\begin{problem}[证明题 $\star\star$]
-\textbf{隐式正则化}。考虑欠定线性回归$\min_w \|Xw - y\|^2$，其中$X \in \mathbb{R}^{n \times d}$，$n < d$（有无穷多解）。证明：从$w_0 = 0$出发的梯度下降收敛到最小范数解：
-\[
-w^* = X^\top(XX^\top)^{-1}y = \arg\min_{Xw=y} \|w\|_2
-\]
-\begin{hint}
-分两步：(1) 证明梯度$\nabla L = X^\top(Xw - y)$始终在$\text{row}(X)$中，因此$w_t$始终在$\text{row}(X)$中；(2) 在$\text{row}(X)$中满足$Xw = y$的解唯一，且就是最小范数解。
-\end{hint}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-\textbf{高维鞍点}。解释为什么在高维非凸优化中，大多数临界点是鞍点而非局部极小值。
-\begin{subproblems}
-    \item Bray-Dean定理说了什么？
-    \item 什么是Wigner半圆律？临界点处Hessian的特征值服从什么分布？
-    \item 为什么临界点是局部极小的概率约为$2^{-d}$（$d$为维度）？
-    \item Choromanska等人的结果如何将此与神经网络联系起来？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-\textbf{逃离鞍点}。
-\begin{subproblems}
-    \item 定义strict saddle point。
-    \item Perturbed GD如何帮助逃离鞍点？其基本思想是什么？
-    \item 在负曲率方向上，扰动以什么速率增长？
-    \item 为什么SGD本身的噪声可以起到类似的扰动作用？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star\star$]
-\textbf{Neural Tangent Kernel (NTK)}。考虑参数为$\theta$的神经网络$f(x;\theta)$。
-\begin{subproblems}
-    \item 写出NTK的定义：$K(x, x') = \nabla_\theta f(x;\theta)^\top \nabla_\theta f(x';\theta)$。
-    \item 在梯度流（gradient flow）下，证明网络输出的演化满足：$\frac{df}{dt} = -K(f - y)$，其中$f = (f(x_1;\theta), \ldots, f(x_n;\theta))$。
-    \item 在无限宽极限下，为什么$K$趋于固定（与$\theta$无关）？这如何保证全局收敛？
-    \item NTK理论的主要局限是什么？什么是"lazy training"？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[思考题 $\star\star$]
-训练过程中，权重矩阵的奇异值分布如何变化？
-\begin{subproblems}
-    \item 初始化时，权重矩阵的奇异值分布接近什么？（Marchenko-Pastur分布）
-    \item 训练后观察到什么现象？（heavy tail）
-    \item 为什么说"偏离MP分布越多，学得越好"？
-\end{subproblems}
-\end{problem}
-
-%========================================
-% 第10章
-%========================================
-\section{第10讲：变分法与最优控制}
-
-\begin{problem}[概念题 $\star$]
-什么是泛函（functional）？给出泛函的定义，并举两个优化泛函的经典例子。
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-\textbf{Euler-Lagrange方程}。考虑泛函$J[y] = \int_a^b F(x, y, y')\,dx$，其中$y(a)$和$y(b)$给定。
-\begin{subproblems}
-    \item 写出Euler-Lagrange方程：$\frac{\partial F}{\partial y} - \frac{d}{dx}\frac{\partial F}{\partial y'} = 0$。
-    \item 对泛函$J[y] = \int_0^1 (y'^2 + y^2)\,dx$，$y(0) = 0$, $y(1) = 1$，写出对应的Euler-Lagrange方程。
-    \item 求解上述方程，找到使$J$取极值的函数$y(x)$。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[证明题 $\star\star$]
-\textbf{最大熵原理}。在约束$\int p(x)\,dx = 1$和$\mathbb{E}[x] = \mu$, $\text{Var}(x) = \sigma^2$下，最大化微分熵$H[p] = -\int p(x)\log p(x)\,dx$。
-\begin{subproblems}
-    \item 写出带Lagrange乘子的泛函。
-    \item 利用变分法导出最优分布$p^*(x)$。
-    \item 验证$p^*(x)$是高斯分布$\mathcal{N}(\mu, \sigma^2)$。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-\textbf{KL散度与变分推断}。
-\begin{subproblems}
-    \item 写出KL散度$D_{KL}(q\|p) = \int q(x)\log\frac{q(x)}{p(x)}\,dx$的定义，并证明$D_{KL}(q\|p) \geq 0$（利用Jensen不等式）。
-    \item 在变分推断中，我们用$q(z)$近似后验$p(z|x)$。证明最小化$D_{KL}(q\|p(\cdot|x))$等价于最大化ELBO（Evidence Lower Bound）：
-    \[
-    \text{ELBO}(q) = \mathbb{E}_{q}[\log p(x,z)] - \mathbb{E}_q[\log q(z)]
-    \]
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star\star$]
-\textbf{最优控制与HJB方程}。
-\begin{subproblems}
-    \item 写出连续时间最优控制问题的一般形式：$\min_{u(\cdot)} \int_0^T L(x,u)\,dt + \Phi(x(T))$，s.t. $\dot{x} = f(x,u)$。
-    \item 写出Hamilton-Jacobi-Bellman（HJB）方程。
-    \item 解释HJB方程与Bellman方程（RL中的离散版本）之间的联系。
-    \item 伴随方法（adjoint method）如何与反向传播联系？在Neural ODE中，为什么adjoint method可以将显存从$O(L)$降到$O(1)$？
-\end{subproblems}
-\end{problem}
-
-%========================================
-% 第11章
-%========================================
-\section{第11讲：在线优化与Regret框架}
-
-\begin{problem}[概念题 $\star$]
-描述在线学习（online learning）的基本框架：每轮做什么决策？收到什么反馈？目标是什么？
-\end{problem}
-
-\begin{problem}[概念题 $\star$]
-写出Regret的定义：
-\[
-\text{Regret}_T = \sum_{t=1}^T \ell_t(x_t) - \min_{x \in \mathcal{X}} \sum_{t=1}^T \ell_t(x)
-\]
-解释为什么我们追求$\text{Regret}_T = o(T)$（即$\text{Regret}_T / T \to 0$），以及这意味着什么。
-\end{problem}
-
-\begin{problem}[证明题 $\star\star$]
-\textbf{Multiplicative Weights Update}。对于$N$个专家的在线决策问题，MWU算法如下：
-\begin{enumerate}[label=\arabic*.]
-    \item 初始化权重$w_1^i = 1$，$\forall i$
-    \item 每轮$t$：选择分布$p_t^i = w_t^i / \sum_j w_t^j$
-    \item 收到损失$\ell_t^i$后更新$w_{t+1}^i = w_t^i (1 - \eta \ell_t^i)$
-\end{enumerate}
-证明MWU的Regret界为$O(\sqrt{T \log N})$。
-\begin{hint}
-使用势函数$\Phi_t = \sum_i w_t^i$，分析$\Phi_t$的变化。
-\end{hint}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-\textbf{Multi-Armed Bandit}。考虑$K=3$个臂的Bandit问题，真实期望奖励分别为$\mu_1=0.3$，$\mu_2=0.7$，$\mu_3=0.5$。
-\begin{subproblems}
-    \item 写出UCB1算法的选择准则：$a_t = \arg\max_i \left[\hat{\mu}_i + \sqrt{\frac{2\ln t}{n_i}}\right]$，并解释"乐观面对不确定"的含义。
-    \item 假设前3轮分别拉了臂1、2、3，奖励分别为0、1、0。计算第4轮每个臂的UCB值，决定拉哪个臂。
-    \item UCB1的Regret上界是$O(\sqrt{KT \log T})$。这与完全信息（在线学习）的$O(\sqrt{T \log K})$相比如何？信息缺失的代价体现在哪里？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-叙述Hoeffding不等式，并解释它如何用于构造置信区间。如果对一个均值为$\mu$的$[0,1]$随机变量采样$n$次，样本均值$\hat{\mu}$满足$|\hat{\mu} - \mu| \leq \epsilon$的概率至少为多少？
-\end{problem}
-
-\begin{problem}[思考题 $\star\star\star$]
-课程提出"Regret是统一语言"，从在线学习到Bandit到MDP，Regret框架如何统一它们？
-\begin{subproblems}
-    \item 在线学习的Regret与Bandit的Regret在定义上有什么区别？
-    \item MDP的Regret如何定义？
-    \item 这三者的Regret下界分别是多少？信息量从多到少如何影响Regret？
-\end{subproblems}
-\end{problem}
-
-%========================================
-% 第12章
-%========================================
-\section{第12讲：MDP与Tabular RL理论}
-
-\begin{problem}[概念题 $\star$]
-定义MDP的五元组$(S, A, P, R, \gamma)$，并分别解释每个元素的含义。写出有限时间（episodic）和无限时间（discounted）两种设定下的目标函数。
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-\textbf{Bellman方程}。考虑一个简单的GridWorld：$2\times 2$的网格，状态$\{s_1, s_2, s_3, s_4\}$（左上、右上、左下、右下），动作$\{$上、下、左、右$\}$。$s_4$是终点（奖励+1），每步奖励为$-0.04$，折扣因子$\gamma = 0.9$。
-\begin{subproblems}
-    \item 写出最优Bellman方程$V^*(s) = \max_a \left[R(s,a) + \gamma \sum_{s'} P(s'|s,a)V^*(s')\right]$。
-    \item 使用值迭代（Value Iteration），从$V_0(s) = 0$出发，计算$V_1$和$V_2$。
-    \item 值迭代为什么一定收敛？与Bellman算子的收缩映射性质有什么关系？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[证明题 $\star\star$]
-证明Bellman最优算子$\mathcal{T}$是$\gamma$-收缩映射，即对任意值函数$V_1, V_2$：
-\[
-\|\mathcal{T}V_1 - \mathcal{T}V_2\|_\infty \leq \gamma \|V_1 - V_2\|_\infty
-\]
-由此说明值迭代的收敛性（Banach不动点定理）。
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-比较值迭代（Value Iteration）和策略迭代（Policy Iteration）：
-\begin{subproblems}
-    \item 分别描述两种算法的步骤。
-    \item 哪种算法的每步计算量更大？哪种收敛更快（迭代次数）？
-    \item 策略迭代为什么能保证在有限步内收敛？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star\star$]
-\textbf{UCB-VI算法}。
-\begin{subproblems}
-    \item UCB-VI是如何将Bandit中的"乐观原则"推广到MDP的？
-    \item 其Regret上界为$\tilde{O}(\sqrt{H^3 S A T})$，其中$H$是episode长度，$S$是状态数，$A$是动作数，$T$是总步数。解释每个因子的含义。
-    \item Regret下界为$\Omega(\sqrt{HSAT})$。与上界相比，差距在哪里？
-    \item 什么是$(\varepsilon, \delta)$-PAC？它与Regret有什么关系？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[思考题 $\star\star$]
-GPU上的值迭代：
-\begin{subproblems}
-    \item 为什么值迭代适合GPU并行？哪些计算可以并行？
-    \item 当状态空间$|S| = 100000$时，为什么GPU版本比CPU版本快50倍？
-    \item 表格方法的根本限制是什么？为什么需要函数逼近？
-\end{subproblems}
-\end{problem}
-
-%========================================
-% 第13章
-%========================================
-\section{第13讲：深度RL与策略优化}
-
-\begin{problem}[概念题 $\star$]
-解释DQN（Deep Q-Network）的核心思想：
-\begin{subproblems}
-    \item 为什么需要经验回放（Experience Replay）？
-    \item 为什么需要目标网络（Target Network）？
-    \item DQN使用的损失函数是什么？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[证明题 $\star\star$]
-\textbf{策略梯度定理}。证明：
-\[
-\nabla_\theta J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}\left[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot Q^{\pi_\theta}(s_t, a_t)\right]
-\]
-\begin{hint}
-从$J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}[R(\tau)]$出发，利用$\nabla_\theta \pi_\theta = \pi_\theta \nabla_\theta \log \pi_\theta$。
-\end{hint}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-\textbf{REINFORCE与方差缩减}。
-\begin{subproblems}
-    \item 写出REINFORCE算法的梯度估计：$\hat{g} = \sum_t \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot G_t$，其中$G_t$是什么？
-    \item 引入baseline $b(s_t)$后，梯度估计变为$\hat{g} = \sum_t \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot (G_t - b(s_t))$。证明任意baseline $b$不改变梯度的期望（即仍然无偏）。
-    \item 最优baseline $b^*(s)$是什么？为什么通常取$b(s) \approx V^{\pi}(s)$？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-\textbf{Actor-Critic方法}。
-\begin{subproblems}
-    \item Actor和Critic分别学什么？
-    \item 什么是TD误差（Temporal Difference error）$\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$？它在Actor-Critic中起什么作用？
-    \item 与REINFORCE相比，Actor-Critic的优势和劣势分别是什么？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star\star$]
-\textbf{自然梯度与Fisher信息矩阵}。
-\begin{subproblems}
-    \item 写出Fisher信息矩阵的定义：$F(\theta) = \mathbb{E}_{\pi_\theta}\left[\nabla_\theta \log \pi_\theta(a|s) \nabla_\theta \log \pi_\theta(a|s)^\top\right]$。
-    \item 自然梯度更新为$\theta \leftarrow \theta - \eta F^{-1} \nabla_\theta J$。解释为什么这比普通梯度更好（参数化不变性）。
-    \item Fisher信息矩阵与KL散度有什么关系？（提示：$F$是KL散度的Hessian）
-    \item 这与课程第5讲的"预条件"暗线有什么联系？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-\textbf{TRPO}。
-\begin{subproblems}
-    \item 写出TRPO的优化问题：$\max_\theta L(\theta)$ s.t. $D_{KL}(\pi_{\theta_\text{old}} \| \pi_\theta) \leq \delta$。
-    \item 为什么需要信任域约束？如果不加约束会怎样？
-    \item TRPO使用什么方法近似求解这个约束优化问题？
-\end{subproblems}
-\end{problem}
-
-%========================================
-% 第14章
-%========================================
-\section{第14讲：PPO——约束优化的巅峰}
-
-\begin{problem}[概念题 $\star$]
-PPO有两个变体：PPO-Penalty和PPO-Clip。分别写出它们的目标函数。
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-\textbf{PPO-Clip}。定义概率比$r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_\text{old}}(a_t|s_t)}$。
-\begin{subproblems}
-    \item PPO-Clip的目标函数为
-    \[
-    L^{\text{CLIP}}(\theta) = \mathbb{E}_t\left[\min\left(r_t(\theta)\hat{A}_t, \;\text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t\right)\right]
-    \]
-    其中$\hat{A}_t$是优势函数估计。解释clipping操作的直觉：当$\hat{A}_t > 0$和$\hat{A}_t < 0$时，clipping分别限制了什么？
-    \item 取$\epsilon = 0.2$。如果$r_t = 1.5$，$\hat{A}_t = 2$，计算clipped目标值。
-    \item 如果$r_t = 0.6$，$\hat{A}_t = -1$，计算clipped目标值。
-    \item 为什么说PPO-Clip近似实现了信任域约束？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-\textbf{GAE（Generalized Advantage Estimation）}。
-\begin{subproblems}
-    \item 写出$\lambda$-return的定义和GAE的公式：$\hat{A}_t^{\text{GAE}(\gamma,\lambda)} = \sum_{l=0}^{\infty}(\gamma\lambda)^l \delta_{t+l}$。
-    \item $\lambda = 0$和$\lambda = 1$分别对应什么？各自的偏差和方差如何？
-    \item 为什么GAE是偏差-方差trade-off的有效工具？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[思考题 $\star\star$]
-从课程的"对偶"暗线角度理解PPO的演进：
-\begin{subproblems}
-    \item TRPO：$\max L(\theta)$ s.t. $\text{KL} \leq \delta$（硬约束）。
-    \item PPO-Penalty：$\max L(\theta) - \beta \cdot \text{KL}$（软惩罚）。这与Lagrangian对偶的关系是什么？
-    \item PPO-Clip：用clipping近似信任域。这从第2讲的KKT到第14讲的PPO，"约束$\to$对偶$\to$一阶"的演进说明了什么？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star\star$]
-\textbf{RLHF中的PPO}。
-\begin{subproblems}
-    \item 描述RLHF的三个阶段：SFT $\to$ 奖励模型训练 $\to$ PPO微调。
-    \item 在PPO微调阶段，目标函数是什么？为什么需要加入KL惩罚项$\beta \cdot D_{KL}(\pi_\theta \| \pi_{\text{ref}})$？
-    \item PPO在RLHF中面临哪些工程挑战（如reward hacking、训练不稳定）？
-\end{subproblems}
-\end{problem}
-
-%========================================
-% 第15章
-%========================================
-\section{第15讲：分布式优化}
-
-\begin{problem}[概念题 $\star$]
-解释分布式优化中数据并行（Data Parallelism）和模型并行（Model Parallelism）的区别。各自适用于什么场景？
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-\textbf{ADMM}。考虑问题$\min f(x) + g(z)$ s.t. $Ax + Bz = c$。ADMM的迭代步骤为：
-\begin{align*}
-x^{k+1} &= \arg\min_x \left(f(x) + \frac{\rho}{2}\|Ax + Bz^k - c + u^k\|_2^2\right) \\
-z^{k+1} &= \arg\min_z \left(g(z) + \frac{\rho}{2}\|Ax^{k+1} + Bz - c + u^k\|_2^2\right) \\
-u^{k+1} &= u^k + Ax^{k+1} + Bz^{k+1} - c
-\end{align*}
-\begin{subproblems}
-    \item 用ADMM求解LASSO问题：$\min \frac{1}{2}\|Ax - b\|_2^2 + \lambda\|z\|_1$ s.t. $x = z$。写出$x$-更新和$z$-更新的显式公式。
-    \item $z$-更新涉及的近端算子（proximal operator）$\text{prox}_{\lambda\|\cdot\|_1}(v) = ?$
-    \item 解释ADMM中对偶上升（dual ascent）的思想。$u$的更新有什么含义？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-\textbf{数据并行SGD}。
-\begin{subproblems}
-    \item 描述同步SGD（Synchronous SGD）的过程：每个worker计算本地梯度，然后如何聚合？
-    \item 异步SGD与同步SGD相比有什么优缺点？
-    \item 什么是"掉队者问题"（straggler problem）？如何缓解？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[计算题 $\star\star$]
-\textbf{All-Reduce}。$K$个GPU需要汇总各自的梯度向量（每个长度为$n$）。
-\begin{subproblems}
-    \item 朴素方法（所有GPU发送到一个master，再广播）的通信量是多少？
-    \item Ring All-Reduce算法的通信量是多少？解释其工作原理。
-    \item 为什么Ring All-Reduce对GPU集群更友好？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[概念题 $\star\star$]
-\textbf{梯度压缩}。
-\begin{subproblems}
-    \item 解释Top-K梯度稀疏化的思想：只传输最大的$K$个梯度分量。
-    \item 量化压缩（如1-bit SGD）如何工作？其核心假设是什么？
-    \item 梯度压缩引入的误差如何影响收敛？如何用误差反馈（error feedback）缓解？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[思考题 $\star\star\star$]
-\textbf{联邦学习}。
-\begin{subproblems}
-    \item FedAvg算法的步骤是什么？与数据并行SGD有什么区别？
-    \item 联邦学习面临的主要挑战有哪些？（如非i.i.d.数据、通信效率、隐私）
-    \item 从优化的角度，为什么非i.i.d.数据分布会影响FedAvg的收敛性？
-\end{subproblems}
-\end{problem}
-
-%========================================
-% 综合题
-%========================================
-\newpage
-\section*{附：综合题（跨章节）}
-\addcontentsline{toc}{section}{附：综合题（跨章节）}
-\setcounter{problem}{0}
-\renewcommand{\theproblem}{综.\arabic{problem}}
-
-\begin{problem}[综合 $\star\star\star$]
-\textbf{五条暗线追踪}。课程贯穿五条暗线：对偶、Regret、预条件、随机化、流形。请各用一段话（100字以内）总结每条暗线从第一次出现到最后一次出现的演进脉络。
-\end{problem}
-
-\begin{problem}[综合 $\star\star\star$]
-\textbf{GPU范式转变}。
-\begin{subproblems}
-    \item 列出至少4个"经典思维 vs GPU思维"的对比，并各举课程中的一个具体例子。
-    \item 在你理解中，"IO感知 $>$ FLOPS"意味着什么？用FlashAttention为例说明。
-    \item 课程认为"并行度 $>$ 复杂度"。这个观点有什么局限性？在什么情况下仍然是复杂度更重要？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[综合 $\star\star\star$]
-\textbf{从凸到非凸到在线}。回顾课程对不同优化问题的处理方式：
-\begin{subproblems}
-    \item 凸优化（第2-3讲）：为什么凸性是"最重要的结构"？凸优化有哪些"礼物"（好的性质）？
-    \item 非凸优化（第9讲）：在深度学习中，为什么非凸问题也能被有效求解？列出三个理论解释。
-    \item 在线优化（第11-14讲）：Regret框架如何将在线学习、Bandit和RL统一起来？
-    \item 从"发现结构$\to$发展方法"的角度，总结这三类问题各自利用了什么结构。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[综合 $\star\star$]
-\textbf{从理论到实践的差距}。课程中多次强调理论最优不等于实践最优。请各举一个例子说明：
-\begin{subproblems}
-    \item 理论复杂度低但实践中慢的算法。
-    \item 理论复杂度高但在GPU上很快的算法。
-    \item 理论上有保证但实践中不使用的方法。
-    \item 理论上没有保证但实践中效果很好的方法。
-\end{subproblems}
-\end{problem}
-
-%========================================
-%========================================
-% 补充：经典手算计算题
-%========================================
-%========================================
-\newpage
-\section*{补充：经典手算计算题}
-\addcontentsline{toc}{section}{补充：经典手算计算题}
-\setcounter{problem}{0}
-\renewcommand{\theproblem}{计.\arabic{problem}}
-
-\bigskip
-\begin{center}
-\textit{以下题目均需要手工推导和计算，来源于经典教科书。\\每题标注了对应的课程章节。}
-\end{center}
-
-%--- 凸性判定与性质（对应第2讲）---
+% --- 按章节归并的补充题 ---
+\subsection*{补充手算题}
 \subsection*{一、凸性判定与性质（第2讲）}
 
 \begin{problem}[$\star$]
@@ -1149,6 +400,91 @@ u^{k+1} &= u^k + Ax^{k+1} + Bz^{k+1} - c
 \end{problem}
 
 %--- LP对偶手算（对应第3讲）---
+\subsection*{补充编程题}
+\subsection*{第2讲：凸优化与KKT}
+
+\begin{problem}[$\star\star$]
+\textbf{用CVXPY求解并验证KKT}
+
+考虑投资组合优化问题：
+\[
+\min_w \quad w^\top \Sigma w \quad \text{s.t.} \quad \mu^\top w \geq r_{\min}, \quad \mathbf{1}^\top w = 1, \quad w \geq 0
+\]
+其中$\Sigma$是$5\times 5$的协方差矩阵，$\mu$是期望收益向量。
+\begin{subproblems}
+    \item 随机生成$\Sigma$（半正定）和$\mu$，用CVXPY求解。
+    \item 从求解结果中提取对偶变量，手动验证KKT条件（梯度条件、互补松弛）。
+    \item 改变$r_{\min}$的值，画出有效前沿（efficient frontier）：横轴标准差，纵轴期望收益。
+    \item 验证"影子价格"：$r_{\min}$增加$\epsilon$后，最优目标值变化是否约为$\lambda^* \cdot \epsilon$？
+\end{subproblems}
+\end{problem}
+
+%--- 第3讲 ---
+\section{第3讲：LP对偶与近似算法}
+
+\begin{problem}[概念题 $\star$]
+写出线性规划标准形及其对偶问题：
+\begin{subproblems}
+    \item 原问题：$\min c^\top x$ s.t. $Ax = b$, $x \geq 0$
+    \item 对偶问题是什么？
+    \item 写出LP对偶的机械化构造规则。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+考虑以下线性规划问题：
+\[
+\max \quad 3x_1 + 5x_2 \quad \text{s.t.} \quad x_1 \leq 4, \quad 2x_2 \leq 12, \quad 3x_1 + 5x_2 \leq 25, \quad x_1, x_2 \geq 0
+\]
+\begin{subproblems}
+    \item 写出该问题的对偶问题。
+    \item 利用互补松弛条件和对偶可行性，求解原问题和对偶问题的最优解。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[证明题 $\star\star$]
+证明LP的强对偶定理（假设原问题有有界最优解）：原问题最优值等于对偶问题最优值，即$p^* = d^*$。
+\begin{hint}
+可以使用超平面分离定理或Farkas引理。
+\end{hint}
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+\textbf{LP松弛与近似}。考虑最小顶点覆盖问题（Minimum Vertex Cover）：给定图$G=(V,E)$，其整数规划形式为：
+\[
+\min \sum_{v \in V} x_v \quad \text{s.t.} \quad x_u + x_v \geq 1, \forall (u,v)\in E, \quad x_v \in \{0,1\}
+\]
+\begin{subproblems}
+    \item 写出其LP松弛（将$x_v \in \{0,1\}$放宽为$0 \leq x_v \leq 1$）。
+    \item 描述LP松弛舍入算法：$x_v^{LP} \geq 1/2$则取$x_v = 1$，否则$x_v = 0$。
+    \item 证明这个舍入方案给出2-近似：$\text{ALG} \leq 2 \cdot \text{OPT}$。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star\star$]
+简述Goemans-Williamson算法求解Max-Cut问题的思想：
+\begin{subproblems}
+    \item 写出Max-Cut的SDP松弛。
+    \item 解释随机超平面舍入（random hyperplane rounding）的思想。
+    \item 为什么近似比是$0.878 \approx \min_{0 \leq \theta \leq \pi} \frac{2}{\pi} \cdot \frac{\theta}{1 - \cos\theta}$？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[思考题 $\star\star$]
+为什么在GPU时代，用于求解大规模LP的一阶方法（如PDHG）正在复兴？请从以下角度分析：
+\begin{subproblems}
+    \item 单纯形法和内点法各自的瓶颈是什么？
+    \item PDHG（Primal-Dual Hybrid Gradient）为什么适合GPU？
+    \item 在什么规模/结构的LP问题上，GPU一阶方法更有优势？
+\end{subproblems}
+\end{problem}
+
+%========================================
+% 第4章
+%========================================
+
+% --- 按章节归并的补充题 ---
+\subsection*{补充手算题}
 \subsection*{三、LP对偶手算（第3讲）}
 
 \begin{problem}[$\star$]
@@ -1197,6 +533,74 @@ A = \begin{pmatrix} 3 & 1 \\ 0 & 4 \end{pmatrix}
 \end{problem}
 
 %--- 动态规划手算（对应第4讲）---
+\subsection*{补充编程题}
+\subsection*{第3讲：LP对偶与近似算法}
+
+\begin{problem}[$\star\star$]
+\textbf{Vertex Cover: LP松弛舍入}
+
+\begin{subproblems}
+    \item 用 \texttt{networkx} 随机生成一个$n=20$的Erd\H{o}s-R\'{e}nyi图$G(n, p=0.3)$。
+    \item 用CVXPY求解最小顶点覆盖的LP松弛。
+    \item 实现舍入算法（$x_v \geq 0.5$则选入覆盖），验证结果是合法的顶点覆盖。
+    \item 比较LP最优值、舍入解大小、（若$n$不太大可暴力搜索）真实最小覆盖大小。验证$\text{ALG} \leq 2\cdot\text{OPT}$。
+\end{subproblems}
+\end{problem}
+
+%--- 第4讲 ---
+\section{第4讲：算法设计范式与GPU化}
+
+\begin{problem}[概念题 $\star$]
+分治法的三个步骤是什么？写出分治法的时间复杂度递推关系的一般形式$T(n) = aT(n/b) + f(n)$，并说明Master定理的三种情况。
+\end{problem}
+
+\begin{problem}[计算题 $\star$]
+使用Master定理分析以下递推的时间复杂度：
+\begin{subproblems}
+    \item $T(n) = 2T(n/2) + O(n)$（归并排序）
+    \item $T(n) = 8T(n/2) + O(n^2)$（朴素矩阵乘法）
+    \item $T(n) = 7T(n/2) + O(n^2)$（Strassen算法）
+    \item $T(n) = 2T(n/2) + O(n \log n)$
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+动态规划需要满足两个条件：\textbf{最优子结构}和\textbf{重叠子问题}。
+\begin{subproblems}
+    \item 分别解释这两个条件的含义。
+    \item 为什么贪心算法不需要"重叠子问题"？
+    \item 动态规划和分治法的核心区别是什么？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+考虑编辑距离问题：将字符串$s_1$变为$s_2$的最小操作数（插入、删除、替换各花费1）。
+\begin{subproblems}
+    \item 写出状态转移方程$dp[i][j]$。
+    \item 计算"kitten"和"sitting"的编辑距离。
+    \item 该DP算法的时间和空间复杂度分别是多少？
+    \item 解释如何利用GPU的对角线并行（wavefront并行）来加速编辑距离的计算。为什么同一条反对角线上的元素可以并行计算？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[证明题 $\star\star$]
+\textbf{贪心算法的交换论证}。考虑活动选择问题：给定$n$个活动，每个活动有开始时间$s_i$和结束时间$f_i$。请用交换论证（exchange argument）证明：按结束时间最早贪心选择可以得到最优解。
+\end{problem}
+
+\begin{problem}[思考题 $\star\star\star$]
+GPU暴力法的"逆袭"：
+\begin{subproblems}
+    \item 对于Two Sum问题（在数组中找两个数使得和为目标值），哈希表解法的复杂度是$O(n)$。GPU暴力解法检查所有$O(n^2)$对，但可以完全并行化。在什么规模的$n$下，GPU暴力可能更快？解释原因。
+    \item 更一般地，讨论"顺序依赖性"如何影响算法的GPU可并行化程度。将分治、DP、贪心三种范式按GPU友好程度排序并解释原因。
+\end{subproblems}
+\end{problem}
+
+%========================================
+% 第5章
+%========================================
+
+% --- 按章节归并的补充题 ---
+\subsection*{补充手算题}
 \subsection*{四、动态规划手算（第4讲）}
 
 \begin{problem}[$\star$]
@@ -1239,6 +643,101 @@ A = \begin{pmatrix} 3 & 1 \\ 0 & 4 \end{pmatrix}
 \end{problem}
 
 %--- 梯度下降手算（对应第5讲）---
+\subsection*{补充编程题}
+\subsection*{第4讲：算法范式与GPU化}
+
+\begin{problem}[$\star\star$]
+\textbf{编辑距离的GPU对角线并行}
+
+\begin{subproblems}
+    \item 实现标准的$O(mn)$ CPU版本编辑距离。
+    \item 实现GPU对角线并行版本：按反对角线$k=0,1,\ldots,m+n$扫描，每条反对角线内的元素用PyTorch向量化计算。
+    \item 生成两个长度为5000的随机字符串。比较CPU版和GPU版的运行时间。
+    \item 画出对角线填充的动态示意图（例如在$10\times 10$的小例子上，用颜色表示填充顺序）。
+\end{subproblems}
+\end{problem}
+
+%--- 第5讲 ---
+\section{第5讲：梯度法与预条件}
+
+\begin{problem}[概念题 $\star$]
+写出梯度下降法的迭代公式，并解释为什么负梯度方向是局部最速下降方向。
+\end{problem}
+
+\begin{problem}[计算题 $\star$]
+考虑函数$f(x_1, x_2) = 2x_1^2 + x_2^2 - 2x_1x_2 + 4x_1 - 6x_2$。
+\begin{subproblems}
+    \item 计算梯度$\nabla f$和Hessian矩阵$H$。
+    \item 验证$f$是强凸函数。
+    \item 求$f$的最小值点（令$\nabla f = 0$）。
+    \item 计算条件数$\kappa = \lambda_{\max}(H)/\lambda_{\min}(H)$，并解释它对梯度下降收敛速度的影响。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[证明题 $\star\star$]
+证明梯度下降法在$L$-光滑凸函数上的收敛速率。具体来说，设$f$是凸函数且$\nabla f$是$L$-Lipschitz的（即$\|\nabla f(x) - \nabla f(y)\| \leq L\|x - y\|$），步长$\eta = 1/L$。证明：
+\[
+f(x_T) - f(x^*) \leq \frac{L\|x_0 - x^*\|^2}{2T}
+\]
+\begin{hint}
+先证明descent lemma: $f(y) \leq f(x) + \nabla f(x)^\top(y-x) + \frac{L}{2}\|y-x\|^2$。
+\end{hint}
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+\textbf{条件数的影响}。考虑二次函数$f(x) = \frac{1}{2}x^\top A x - b^\top x$，其中
+\[
+A = \begin{pmatrix} 100 & 0 \\ 0 & 1 \end{pmatrix}, \quad b = \begin{pmatrix} 100 \\ 1 \end{pmatrix}
+\]
+\begin{subproblems}
+    \item 计算最优解$x^*$和条件数$\kappa$。
+    \item 梯度下降从$x_0 = (0,0)^\top$出发，步长$\eta = 1/\lambda_{\max}(A) = 0.01$。写出前3步的迭代过程。
+    \item 对于强凸函数，梯度下降的收敛率为$O\left(\left(\frac{\kappa-1}{\kappa+1}\right)^T\right)$。当$\kappa = 100$时，需要大约多少步使得误差缩小到初始的$1/e$？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+比较以下优化方法，填表：
+\begin{center}
+\begin{tabular}{l|c|c|c}
+\toprule
+方法 & 每步复杂度 & 收敛速度 & GPU友好度 \\
+\midrule
+梯度下降 & & & \\
+牛顿法 & & & \\
+L-BFGS & & & \\
+对角预条件(Adam) & & & \\
+\bottomrule
+\end{tabular}
+\end{center}
+并解释为什么在GPU时代，"一阶方法+简单预条件"往往优于"二阶方法"。
+\end{problem}
+
+\begin{problem}[计算题 $\star\star\star$]
+\textbf{牛顿法}。考虑$f(x) = e^x + e^{-x}$。
+\begin{subproblems}
+    \item 计算$f'(x)$和$f''(x)$。
+    \item 写出牛顿法迭代公式：$x_{k+1} = x_k - \frac{f'(x_k)}{f''(x_k)}$。
+    \item 从$x_0 = 1$出发，计算前3步迭代的值。
+    \item 解释为什么牛顿法具有局部二次收敛性（即$|x_{k+1} - x^*| \leq C|x_k - x^*|^2$）。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[思考题 $\star\star$]
+预条件的本质是"椭圆变圆"。
+\begin{subproblems}
+    \item 解释预条件梯度下降$x \leftarrow x - \eta P^{-1}\nabla f(x)$中$P$的作用。理想情况下$P$应该选什么？
+    \item 为什么在实践中不直接用$P = H$（Hessian矩阵）？
+    \item GPU友好的预条件谱系为：对角 $\to$ 块对角 $\to$ Kronecker $\to$ 低秩。解释这个谱系中"结构化 = 可并行"的含义。
+\end{subproblems}
+\end{problem}
+
+%========================================
+% 第6章
+%========================================
+
+% --- 按章节归并的补充题 ---
+\subsection*{补充手算题}
 \subsection*{五、梯度下降与牛顿法手算（第5讲）}
 
 \begin{problem}[$\star$]
@@ -1315,6 +814,88 @@ A = \begin{pmatrix} 4 & 1 \\ 1 & 3 \end{pmatrix}, \quad b = \begin{pmatrix} 1 \\
 \end{problem}
 
 %--- 流形优化手算（对应第6讲）---
+\subsection*{补充编程题}
+\subsection*{第5讲：梯度法与预条件}
+
+\begin{problem}[$\star$]
+\textbf{梯度下降可视化}
+
+对二维Rosenbrock函数$f(x,y) = (1-x)^2 + 100(y-x^2)^2$：
+\begin{subproblems}
+    \item 实现梯度下降（手动计算梯度），从$(-1, 1)$出发。
+    \item 分别尝试步长$\eta = 10^{-4}, 10^{-3}, 5\times 10^{-3}$，各跑5000步。
+    \item 在等高线图上画出三条轨迹，观察步长对收敛的影响。
+    \item 实现带Backtracking线搜索（Armijo准则）的版本，同一初始点运行，对比效果。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[$\star\star$]
+\textbf{条件数实验}
+
+构造$n=100$维的二次函数$f(x)=\frac{1}{2}x^\top Ax - b^\top x$，其中$A$是对角矩阵$A = \text{diag}(1, 2, \ldots, 100)$，$b = \mathbf{1}$。
+\begin{subproblems}
+    \item 用梯度下降（步长$\eta = 2/(\lambda_{\min}+\lambda_{\max})$），记录每步的$\|x_k - x^*\|$。需要多少步使误差降到$10^{-6}$？
+    \item 用牛顿法，记录同样的收敛曲线。需要几步？
+    \item 对角预条件$P = \text{diag}(A)$的预条件GD需要多少步？
+    \item 改为$A = \text{diag}(1, 1, \ldots, 1, 1000)$（$\kappa=1000$），重复实验。画4条收敛曲线在一张图上。
+\end{subproblems}
+\end{problem}
+
+%--- 第6讲 ---
+\section{第6讲：流形优化}
+
+\begin{problem}[概念题 $\star$]
+什么是光滑流形（smooth manifold）？直观地解释"局部像欧氏空间"的含义。列举三个在优化中常见的流形及其约束条件。
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+解释以下流形优化中的核心概念：
+\begin{subproblems}
+    \item 切空间（tangent space）$T_x\mathcal{M}$
+    \item Riemannian梯度（Riemannian gradient）
+    \item Retraction映射$R_x: T_x\mathcal{M} \to \mathcal{M}$
+    \item 欧氏梯度与Riemannian梯度之间的关系
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+考虑单位球面$S^{n-1} = \{x \in \mathbb{R}^n : \|x\|_2 = 1\}$上的优化问题：
+\[
+\min_{x \in S^{n-1}} f(x) = x^\top A x
+\]
+其中$A$是对称矩阵。
+\begin{subproblems}
+    \item $S^{n-1}$上点$x$处的切空间$T_x S^{n-1}$是什么？
+    \item 将欧氏梯度$\nabla f(x) = 2Ax$投影到切空间，得到Riemannian梯度。
+    \item 写出球面上的retraction映射（归一化投影）。
+    \item 这个优化问题的最优解是什么？（与$A$的特征值/特征向量有什么关系？）
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[计算题 $\star\star\star$]
+\textbf{Stiefel流形}$\text{St}(n,p) = \{W \in \mathbb{R}^{n \times p} : W^\top W = I_p\}$。
+\begin{subproblems}
+    \item 证明$W$处的切空间为$T_W \text{St}(n,p) = \{\Delta : W^\top \Delta + \Delta^\top W = 0\}$。
+    \item 给定欧氏梯度$G = \nabla f(W)$，Riemannian梯度为$\text{grad} f(W) = G - W(W^\top G + G^\top W)/2$。验证$\text{grad} f(W) \in T_W \text{St}(n,p)$。
+    \item 简述QR-based retraction的计算过程：$R_W(\eta) = \text{qf}(W + \eta)$。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[思考题 $\star\star$]
+流形优化 vs 惩罚法：
+\begin{subproblems}
+    \item 用惩罚法处理正交约束$W^\top W = I$，写出目标函数$\tilde{f}(W) = f(W) + \frac{\mu}{2}\|W^\top W - I\|_F^2$的形式。这种方法有什么问题？
+    \item 流形优化的优势是什么？为什么说它是"在约束空间上直接优化"？
+    \item 举一个流形优化在深度学习中的应用（如正交RNN），并解释为什么正交约束可以缓解梯度消失问题。
+\end{subproblems}
+\end{problem}
+
+%========================================
+% 第7章
+%========================================
+
+% --- 按章节归并的补充题 ---
+\subsection*{补充手算题}
 \subsection*{六、流形优化手算（第6讲）}
 
 \begin{problem}[$\star\star$]
@@ -1344,6 +925,187 @@ A = \begin{pmatrix} 3 & 1 & 0 \\ 1 & 2 & 1 \\ 0 & 1 & 1 \end{pmatrix}
 \end{problem}
 
 %--- SGD与Adam手算（对应第8讲）---
+\subsection*{补充编程题}
+\subsection*{第6讲：流形优化}
+
+\begin{problem}[$\star\star$]
+\textbf{球面上的Riemannian梯度下降}
+
+求矩阵$A$的最小特征值和对应特征向量：$\min_{x \in S^{n-1}} x^\top A x$。
+\begin{subproblems}
+    \item 生成$n=10$的随机对称矩阵$A$。
+    \item 实现Riemannian梯度下降：
+    \begin{enumerate}[label=\arabic*.]
+        \item 欧氏梯度$g = 2Ax$
+        \item 投影到切空间$\tilde{g} = g - (x^\top g)x$
+        \item 更新$\tilde{x} = x - \eta \tilde{g}$
+        \item Retraction（归一化）$x = \tilde{x}/\|\tilde{x}\|$
+    \end{enumerate}
+    \item 画出每步$x^\top A x$的值，与\texttt{np.linalg.eigh}给出的最小特征值比较。
+    \item 改变步长$\eta$，观察收敛速度和稳定性。
+\end{subproblems}
+\end{problem}
+
+%--- 第7讲 ---
+\section{第7讲：随机化算法}
+
+\begin{problem}[概念题 $\star$]
+叙述Johnson-Lindenstrauss引理：对于$n$个点$x_1, \ldots, x_n \in \mathbb{R}^d$和$0 < \varepsilon < 1$，存在映射$f: \mathbb{R}^d \to \mathbb{R}^k$（$k = O(\log n / \varepsilon^2)$），使得对所有$i, j$：
+\[
+(1 - \varepsilon)\|x_i - x_j\|^2 \leq \|f(x_i) - f(x_j)\|^2 \leq (1 + \varepsilon)\|x_i - x_j\|^2
+\]
+解释这个引理的意义：为什么投影维度$k$与原始维度$d$无关？
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+\textbf{随机矩阵乘法}。给定$A \in \mathbb{R}^{m \times n}$和$B \in \mathbb{R}^{n \times p}$，随机采样$k$列的近似乘法为$AB \approx CR$，其中：
+\begin{subproblems}
+    \item 描述按列范数比例采样的策略：$P(j \text{ 被选中}) = \frac{\|A_{:,j}\|\|B_{j,:}\|}{\sum_l \|A_{:,l}\|\|B_{l,:}\|}$。
+    \item 证明该估计是无偏的：$\mathbb{E}[CR] = AB$。
+    \item 如果$A$是$10000\times 5000$，$B$是$5000\times 8000$，精确乘法需要多少次浮点运算？采样$k=500$列时需要多少次？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+\textbf{Sketch-and-Solve}用于随机最小二乘。考虑$\min_x \|Ax - b\|_2$，其中$A \in \mathbb{R}^{n \times d}$，$n \gg d$。
+\begin{subproblems}
+    \item Sketch-and-Solve方法将问题转化为$\min_x \|SAx - Sb\|_2$，其中$S \in \mathbb{R}^{k \times n}$是sketching矩阵。$k$一般选多大？
+    \item 列举两种常用的sketching矩阵（如高斯随机矩阵、CountSketch）。
+    \item 解释为什么这种方法可以将时间从$O(nd^2)$降到$O(\text{nnz}(A) \cdot d + d^3)$。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[计算题 $\star\star\star$]
+\textbf{随机SVD}。给定矩阵$A \in \mathbb{R}^{m \times n}$，要求其top-$k$奇异值和奇异向量。
+\begin{subproblems}
+    \item 描述随机SVD算法的步骤：
+    \begin{enumerate}[label=\arabic*.]
+        \item 生成随机矩阵$\Omega \in \mathbb{R}^{n \times (k+p)}$
+        \item 计算$Y = A\Omega$
+        \item 对$Y$做QR分解$Y = QR$
+        \item 计算$B = Q^\top A$
+        \item 对$B$做SVD
+    \end{enumerate}
+    \item 解释为什么$Q$的列空间近似$A$的top-$k$左奇异向量张成的空间。
+    \item 该算法的时间复杂度是多少？与精确SVD（$O(mn\min(m,n))$）相比有何优势？
+    \item 过采样参数$p$（一般取$5 \sim 10$）的作用是什么？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[思考题 $\star\star$]
+解释"随机化让不可能变可能"这一观点。以$50000 \times 50000$矩阵的top-100 SVD为例，精确SVD需要的内存和时间分别是多少？随机SVD如何解决这个问题？
+\end{problem}
+
+%========================================
+% 第8章
+%========================================
+
+% --- 按章节归并的补充题 ---
+\subsection*{补充手算题}
+\subsection*{八、随机化算法手算（第7讲）}
+
+\begin{problem}[$\star\star$]
+\textbf{(JL投影手算)} 将$\mathbb{R}^4$中的三个点$x_1=(1,0,0,0)$, $x_2=(0,1,0,0)$, $x_3=(1,1,0,0)$用随机矩阵$R \in \mathbb{R}^{2 \times 4}$投影到$\mathbb{R}^2$：
+\[
+R = \frac{1}{\sqrt{2}}\begin{pmatrix} 1 & 1 & -1 & 0 \\ 0 & -1 & 0 & 1 \end{pmatrix}
+\]
+\begin{subproblems}
+    \item 计算投影后的点$Rx_1, Rx_2, Rx_3$。
+    \item 计算原始空间中所有点对的距离$\|x_i - x_j\|$。
+    \item 计算投影空间中所有点对的距离$\|Rx_i - Rx_j\|$。
+    \item 计算每个点对的距离保持比率$\|Rx_i - Rx_j\|^2/\|x_i - x_j\|^2$。是否接近1？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[$\star\star$]
+\textbf{(随机SVD小例子)} 考虑矩阵
+\[
+A = \begin{pmatrix} 4 & 0 \\ 3 & -5 \\ 0 & 4 \end{pmatrix}
+\]
+取随机向量$\omega = (1, 0)^\top$，按随机SVD算法的思路求$A$的rank-1近似：
+\begin{subproblems}
+    \item 计算$y = A\omega$。
+    \item 归一化$q = y / \|y\|$。
+    \item 计算$B = q^\top A$。
+    \item 近似$A \approx q B$。计算近似误差$\|A - qB\|_F$。
+    \item 与$A$的精确最佳rank-1近似（由SVD给出）比较。
+\end{subproblems}
+\end{problem}
+
+%--- Bellman方程与值迭代手算（对应第12讲）---
+\subsection*{补充编程题}
+\subsection*{第7讲：随机化算法}
+
+\begin{problem}[$\star\star$]
+\textbf{随机SVD实现}
+
+\begin{subproblems}
+    \item 生成一个$1000\times 1000$的低秩（rank-10）加噪声矩阵：$A = UV^\top + 0.01 \cdot E$，其中$U,V \in \mathbb{R}^{1000\times 10}$，$E$是随机噪声。
+    \item 实现随机SVD算法（约15行代码）：随机投影 $\to$ QR $\to$ 投影回 $\to$ 小SVD。
+    \item 与\texttt{np.linalg.svd}比较：(i) 前10个奇异值的误差；(ii) 运行时间。
+    \item 增加过采样参数$p$从0到20，画出近似误差随$p$的变化曲线。
+\end{subproblems}
+\end{problem}
+
+%--- 第8讲 ---
+\section{第8讲：随机优化}
+
+\begin{problem}[概念题 $\star$]
+写出随机梯度下降（SGD）的更新公式，并证明SGD的梯度估计是无偏的：$\mathbb{E}[\nabla f_i(x)] = \nabla f(x)$，其中$f(x) = \frac{1}{n}\sum_{i=1}^n f_i(x)$。
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+\textbf{Mini-batch方差分析}。设全梯度$\nabla f(x) = \frac{1}{n}\sum_{i=1}^n \nabla f_i(x)$，单个样本梯度的方差为$\text{Var}[\nabla f_i(x)] = \sigma^2$。
+\begin{subproblems}
+    \item 计算mini-batch（大小为$b$）梯度估计的方差$\text{Var}\left[\frac{1}{b}\sum_{j=1}^b \nabla f_{i_j}(x)\right]$。
+    \item 当$b$增大$k$倍时，方差缩小多少倍？计算量增加多少倍？
+    \item 为什么说存在一个"最优batch size"的trade-off？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[证明题 $\star\star$]
+证明SGD在凸、$L$-光滑函数上，使用步长$\eta_t = \frac{c}{\sqrt{T}}$（常数步长缩减方案）的收敛速率为$O(1/\sqrt{T})$。
+\begin{hint}
+使用SGD更新的递推：$\mathbb{E}\|x_{t+1} - x^*\|^2 \leq \mathbb{E}\|x_t - x^*\|^2 - 2\eta_t(f(x_t) - f(x^*)) + \eta_t^2 \sigma^2$。
+\end{hint}
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+\textbf{Adam优化器}。写出Adam的完整更新公式：
+\begin{subproblems}
+    \item 一阶矩估计$m_t$和二阶矩估计$v_t$的更新公式。
+    \item 偏差修正$\hat{m}_t$和$\hat{v}_t$。
+    \item 参数更新公式。
+    \item 解释为什么Adam可以看作"对角预条件+动量"。预条件矩阵是什么？
+    \item Adam的默认超参数$\beta_1, \beta_2, \epsilon$通常取什么值？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+比较以下优化器的特点：
+\begin{subproblems}
+    \item SGD vs SGD+Momentum：动量的物理直觉是什么？
+    \item Momentum vs Nesterov Momentum：Nesterov的"先预测再求梯度"有什么好处？
+    \item Adam vs AdamW：AdamW中的weight decay和L2正则化有什么区别？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[思考题 $\star\star\star$]
+\textbf{大Batch训练}。
+\begin{subproblems}
+    \item 解释为什么简单地增大batch size并线性增大学习率可能导致训练不稳定。
+    \item LARS（Layer-wise Adaptive Rate Scaling）的核心思想是什么？
+    \item 从GPU利用率的角度，解释为什么batch=32时GPU利用率只有30\%，而batch=512时可以达到90\%。
+    \item "小batch浪费GPU"这个观点与"大batch泛化性差"之间如何权衡？
+\end{subproblems}
+\end{problem}
+
+%========================================
+% 第9章
+%========================================
+
+% --- 按章节归并的补充题 ---
+\subsection*{补充手算题}
 \subsection*{七、SGD与Adam手算（第8讲）}
 
 \begin{problem}[$\star\star$]
@@ -1395,203 +1157,174 @@ v_{t+1} = \mu v_t - \eta \nabla f(x_t + \mu v_t), \quad x_{t+1} = x_t + v_{t+1}
 \end{problem}
 
 %--- 随机化算法手算（对应第7讲）---
-\subsection*{八、随机化算法手算（第7讲）}
+\subsection*{补充编程题}
+\subsection*{第8讲：随机优化}
 
 \begin{problem}[$\star\star$]
-\textbf{(JL投影手算)} 将$\mathbb{R}^4$中的三个点$x_1=(1,0,0,0)$, $x_2=(0,1,0,0)$, $x_3=(1,1,0,0)$用随机矩阵$R \in \mathbb{R}^{2 \times 4}$投影到$\mathbb{R}^2$：
-\[
-R = \frac{1}{\sqrt{2}}\begin{pmatrix} 1 & 1 & -1 & 0 \\ 0 & -1 & 0 & 1 \end{pmatrix}
-\]
-\begin{subproblems}
-    \item 计算投影后的点$Rx_1, Rx_2, Rx_3$。
-    \item 计算原始空间中所有点对的距离$\|x_i - x_j\|$。
-    \item 计算投影空间中所有点对的距离$\|Rx_i - Rx_j\|$。
-    \item 计算每个点对的距离保持比率$\|Rx_i - Rx_j\|^2/\|x_i - x_j\|^2$。是否接近1？
-\end{subproblems}
-\end{problem}
+\textbf{优化器赛马：SGD/Momentum/Adam}
 
-\begin{problem}[$\star\star$]
-\textbf{(随机SVD小例子)} 考虑矩阵
-\[
-A = \begin{pmatrix} 4 & 0 \\ 3 & -5 \\ 0 & 4 \end{pmatrix}
-\]
-取随机向量$\omega = (1, 0)^\top$，按随机SVD算法的思路求$A$的rank-1近似：
+用PyTorch在MNIST上训练一个简单的两层全连接网络（784-128-10）：
 \begin{subproblems}
-    \item 计算$y = A\omega$。
-    \item 归一化$q = y / \|y\|$。
-    \item 计算$B = q^\top A$。
-    \item 近似$A \approx q B$。计算近似误差$\|A - qB\|_F$。
-    \item 与$A$的精确最佳rank-1近似（由SVD给出）比较。
-\end{subproblems}
-\end{problem}
-
-%--- Bellman方程与值迭代手算（对应第12讲）---
-\subsection*{九、Bellman方程与值迭代手算（第12讲）}
-
-\begin{problem}[$\star\star$]
-\textbf{(Sutton \& Barto风格)} 考虑$3 \times 3$ GridWorld：
-\begin{center}
-\begin{tabular}{|c|c|c|}
-\hline
-$s_1$ & $s_2$ & $s_3$ \\
-\hline
-$s_4$ & $s_5$ & $s_6$ \\
-\hline
-$s_7$ & $s_8$ & $s_9$ \\
-\hline
-\end{tabular}
-\end{center}
-$s_9$是目标状态（到达得$+10$奖励），其余每步$-1$奖励。动作：上、下、左、右（确定性）。碰墙不动。$\gamma = 0.9$。
-\begin{subproblems}
-    \item 从$V_0 = \mathbf{0}$出发做值迭代。手算$V_1(s)$（所有9个状态）。
-    \item 手算$V_2(s)$（所有9个状态）。
-    \item 从$V_2$中提取贪心策略$\pi_2(s) = \arg\max_a [R + \gamma V_2(s')]$。这个策略合理吗？
-    \item 如果所有状态同时更新（同步），与按某个顺序逐个更新（异步/Gauss-Seidel）相比，结果有什么不同？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[$\star\star$]
-\textbf{(策略评估手算)} 给定策略$\pi$：在$s_1$选右，在$s_2$选右，在$s_3$选下。使用线性方程组法（而非迭代法）求$V^\pi$。
-\begin{center}
-$s_1 \xrightarrow[\text{r=1}]{\text{右}} s_2 \xrightarrow[\text{r=2}]{\text{右}} s_3 \xrightarrow[\text{r=0}]{\text{下}} \text{终止}$
-\end{center}
-$\gamma = 0.9$。
-\begin{subproblems}
-    \item 写出Bellman期望方程组：$V^\pi(s) = R(s,\pi(s)) + \gamma V^\pi(s')$。
-    \item 求解线性方程组得到$V^\pi(s_1), V^\pi(s_2), V^\pi(s_3)$。
+    \item 分别使用SGD（$\eta=0.01$）、SGD+Momentum（$\mu=0.9$）、Adam（默认参数），各训练10个epoch。
+    \item 画出三条训练loss曲线和三条测试accuracy曲线。
+    \item 对SGD，分别尝试batch size $\in \{16, 64, 256, 1024\}$，画出"每epoch时间 vs 收敛速度"的trade-off。
+    \item 实现学习率warmup（前5\%步线性增长），观察对大batch ($\geq 512$) 训练稳定性的影响。
 \end{subproblems}
 \end{problem}
 
 \begin{problem}[$\star\star\star$]
-\textbf{(策略迭代完整手算)} 考虑MDP：$S = \{s_1, s_2\}$，$A = \{a, b\}$，$\gamma = 0.5$。
-\[
-P(s_1|s_1,a) = 0.7, \quad P(s_2|s_1,a) = 0.3, \quad R(s_1,a) = 5
-\]
-\[
-P(s_1|s_1,b) = 0.3, \quad P(s_2|s_1,b) = 0.7, \quad R(s_1,b) = 10
-\]
-\[
-P(s_1|s_2,a) = 0.5, \quad P(s_2|s_2,a) = 0.5, \quad R(s_2,a) = -1
-\]
-\[
-P(s_1|s_2,b) = 0.9, \quad P(s_2|s_2,b) = 0.1, \quad R(s_2,b) = 2
-\]
+\textbf{从零实现Adam}
+
+不使用\texttt{torch.optim}，手写Adam优化器（约20行核心代码）：
 \begin{subproblems}
-    \item \textbf{策略评估}：从初始策略$\pi_0(s_1) = a, \pi_0(s_2) = a$出发，求解$V^{\pi_0}(s_1), V^{\pi_0}(s_2)$（线性方程组）。
-    \item \textbf{策略改进}：对每个状态，检查每个动作的$Q$值：$Q^{\pi_0}(s,a') = R(s,a') + \gamma \sum_{s'} P(s'|s,a')V^{\pi_0}(s')$。确定改进后的策略$\pi_1$。
-    \item 对$\pi_1$重复策略评估和策略改进，直到策略不再变化。
-    \item 与值迭代（从$V_0 = 0$出发迭代5轮）的结果比较。
+    \item 实现完整的Adam更新：$m$和$v$的指数移动平均、偏差修正、参数更新。
+    \item 在Rosenbrock函数上与\texttt{torch.optim.Adam}的结果对比，验证实现正确。
+    \item 去掉偏差修正，观察训练前期的行为差异。
+    \item 将$\beta_2$改为0.9（远小于默认0.999），观察收敛行为的变化。
 \end{subproblems}
 \end{problem}
 
-%--- TD学习与策略梯度手算（对应第13讲）---
-\subsection*{十、TD学习与策略梯度手算（第13讲）}
+%--- 第9讲 ---
+\section{第9讲：深度学习优化理论}
+
+\begin{problem}[概念题 $\star$]
+解释"过参数化悖论"：为什么参数量远大于数据量的深度网络不会严重过拟合？经典学习理论对此有什么预测？实际情况如何？
+\end{problem}
+
+\begin{problem}[证明题 $\star\star$]
+\textbf{隐式正则化}。考虑欠定线性回归$\min_w \|Xw - y\|^2$，其中$X \in \mathbb{R}^{n \times d}$，$n < d$（有无穷多解）。证明：从$w_0 = 0$出发的梯度下降收敛到最小范数解：
+\[
+w^* = X^\top(XX^\top)^{-1}y = \arg\min_{Xw=y} \|w\|_2
+\]
+\begin{hint}
+分两步：(1) 证明梯度$\nabla L = X^\top(Xw - y)$始终在$\text{row}(X)$中，因此$w_t$始终在$\text{row}(X)$中；(2) 在$\text{row}(X)$中满足$Xw = y$的解唯一，且就是最小范数解。
+\end{hint}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+\textbf{高维鞍点}。解释为什么在高维非凸优化中，大多数临界点是鞍点而非局部极小值。
+\begin{subproblems}
+    \item Bray-Dean定理说了什么？
+    \item 什么是Wigner半圆律？临界点处Hessian的特征值服从什么分布？
+    \item 为什么临界点是局部极小的概率约为$2^{-d}$（$d$为维度）？
+    \item Choromanska等人的结果如何将此与神经网络联系起来？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+\textbf{逃离鞍点}。
+\begin{subproblems}
+    \item 定义strict saddle point。
+    \item Perturbed GD如何帮助逃离鞍点？其基本思想是什么？
+    \item 在负曲率方向上，扰动以什么速率增长？
+    \item 为什么SGD本身的噪声可以起到类似的扰动作用？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[计算题 $\star\star\star$]
+\textbf{Neural Tangent Kernel (NTK)}。考虑参数为$\theta$的神经网络$f(x;\theta)$。
+\begin{subproblems}
+    \item 写出NTK的定义：$K(x, x') = \nabla_\theta f(x;\theta)^\top \nabla_\theta f(x';\theta)$。
+    \item 在梯度流（gradient flow）下，证明网络输出的演化满足：$\frac{df}{dt} = -K(f - y)$，其中$f = (f(x_1;\theta), \ldots, f(x_n;\theta))$。
+    \item 在无限宽极限下，为什么$K$趋于固定（与$\theta$无关）？这如何保证全局收敛？
+    \item NTK理论的主要局限是什么？什么是"lazy training"？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[思考题 $\star\star$]
+训练过程中，权重矩阵的奇异值分布如何变化？
+\begin{subproblems}
+    \item 初始化时，权重矩阵的奇异值分布接近什么？（Marchenko-Pastur分布）
+    \item 训练后观察到什么现象？（heavy tail）
+    \item 为什么说"偏离MP分布越多，学得越好"？
+\end{subproblems}
+\end{problem}
+
+%========================================
+% 第10章
+%========================================
+
+% --- 按章节归并的补充题 ---
+\subsection*{补充编程题}
+\subsection*{第9讲：深度学习优化理论}
 
 \begin{problem}[$\star\star$]
-\textbf{(TD(0)手算)} 给定以下经验轨迹（在同一策略$\pi$下）和$\gamma = 1$：
-\begin{align*}
-&\text{轨迹1: } s_1 \xrightarrow{r=0} s_2 \xrightarrow{r=1} \text{终止} \\
-&\text{轨迹2: } s_1 \xrightarrow{r=0} s_2 \xrightarrow{r=1} \text{终止} \\
-&\text{轨迹3: } s_2 \xrightarrow{r=0} \text{终止}
-\end{align*}
-初始$V(s_1) = V(s_2) = 0$，学习率$\alpha = 0.1$。
+\textbf{隐式正则化验证}
+
 \begin{subproblems}
-    \item 依次用每条轨迹的每一步做TD(0)更新：$V(s) \leftarrow V(s) + \alpha[r + \gamma V(s') - V(s)]$。写出每次更新后$V(s_1)$和$V(s_2)$的值。
-    \item 蒙特卡洛方法（first-visit）得到的$V(s_1)$和$V(s_2)$估计是多少？
-    \item 两种方法的结果有什么区别？解释原因。
+    \item 生成欠定线性回归数据：$X \in \mathbb{R}^{20 \times 100}$（随机高斯），$y = Xw_{\text{true}} + \epsilon$。
+    \item 从$w_0 = 0$出发做梯度下降直到$\|Xw - y\| < 10^{-6}$。记录$\|w_T\|_2$。
+    \item 计算最小范数解$w^* = X^\top(XX^\top)^{-1}y$，验证$\|w_T - w^*\|$是否很小。
+    \item 改为从$w_0 = \mathbf{10}$（大初始值）出发，GD收敛到的解$\|w\|_2$是否还是最小范数？为什么？
 \end{subproblems}
 \end{problem}
 
 \begin{problem}[$\star\star\star$]
-\textbf{(REINFORCE手算)} 考虑一个1状态的Bandit问题：$|S|=1$，$A=\{0,1\}$。策略参数化为softmax：
-\[
-\pi_\theta(a=1) = \frac{e^\theta}{1 + e^\theta} = \sigma(\theta), \quad \pi_\theta(a=0) = 1 - \sigma(\theta)
-\]
-奖励$R(a=1) = 1$，$R(a=0) = 0$。取$\theta_0 = 0$（初始时两个动作等概率），学习率$\eta = 0.5$。
+\textbf{Hessian谱的随机Lanczos估计}
+
 \begin{subproblems}
-    \item 计算$\nabla_\theta \log \pi_\theta(a=1)$和$\nabla_\theta \log \pi_\theta(a=0)$。
-    \item 计算策略梯度的期望$\mathbb{E}_{a \sim \pi_\theta}[\nabla_\theta \log \pi_\theta(a) \cdot R(a)]$在$\theta_0 = 0$处的值。
-    \item 假设实际采样到$a=1$（奖励1），REINFORCE更新后$\theta_1 = ?$
-    \item 假设接下来采样到$a=0$（奖励0），更新$\theta_2 = ?$
-    \item 引入baseline $b = 0.5$（期望奖励），重新计算(c)(d)，比较方差是否减小。
+    \item 在MNIST上训练一个小的全连接网络（784-64-10）。
+    \item 用PyTorch的\texttt{torch.autograd.functional.hvp}（Hessian-vector product）实现随机Lanczos算法，估计Hessian的前20个特征值。
+    \item 画出Hessian特征值的直方图（随机采样100个特征值）。是否观察到"bulk + outliers"结构？
+    \item 在训练过程中（每个epoch结束时）重复上述估计，画出最大特征值随训练的变化曲线。
+\end{subproblems}
+\begin{hint}
+Lanczos算法核心：用$Hv$（而非完整$H$）做三对角化。每步只需一次Hessian-vector product，复杂度$O(d)$而非$O(d^2)$。
+\end{hint}
+\end{problem}
+
+%--- 第10讲 ---
+\section{第10讲：变分法与最优控制}
+
+\begin{problem}[概念题 $\star$]
+什么是泛函（functional）？给出泛函的定义，并举两个优化泛函的经典例子。
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+\textbf{Euler-Lagrange方程}。考虑泛函$J[y] = \int_a^b F(x, y, y')\,dx$，其中$y(a)$和$y(b)$给定。
+\begin{subproblems}
+    \item 写出Euler-Lagrange方程：$\frac{\partial F}{\partial y} - \frac{d}{dx}\frac{\partial F}{\partial y'} = 0$。
+    \item 对泛函$J[y] = \int_0^1 (y'^2 + y^2)\,dx$，$y(0) = 0$, $y(1) = 1$，写出对应的Euler-Lagrange方程。
+    \item 求解上述方程，找到使$J$取极值的函数$y(x)$。
 \end{subproblems}
 \end{problem}
 
-%--- PPO手算（对应第14讲）---
-\subsection*{十一、PPO相关手算（第14讲）}
-
-\begin{problem}[$\star\star$]
-\textbf{(重要性采样手算)} 旧策略$\pi_{\text{old}}$和新策略$\pi_\theta$在某状态$s$下的动作概率如下：
-\begin{center}
-\begin{tabular}{c|ccc}
-动作 & $a_1$ & $a_2$ & $a_3$ \\
-\hline
-$\pi_{\text{old}}(a|s)$ & 0.5 & 0.3 & 0.2 \\
-$\pi_\theta(a|s)$ & 0.6 & 0.3 & 0.1
-\end{tabular}
-\end{center}
-优势估计$\hat{A}(s,a_1) = 2$, $\hat{A}(s,a_2) = -1$, $\hat{A}(s,a_3) = 0$。
+\begin{problem}[证明题 $\star\star$]
+\textbf{最大熵原理}。在约束$\int p(x)\,dx = 1$和$\mathbb{E}[x] = \mu$, $\text{Var}(x) = \sigma^2$下，最大化微分熵$H[p] = -\int p(x)\log p(x)\,dx$。
 \begin{subproblems}
-    \item 计算每个动作的概率比$r(a) = \pi_\theta(a|s)/\pi_{\text{old}}(a|s)$。
-    \item 计算PPO-Clip目标（$\epsilon = 0.2$）在每个动作上的值。
-    \item 计算PPO-Clip目标的期望$L^{\text{CLIP}}$（在$\pi_{\text{old}}$下采样）。
-    \item 计算$D_{KL}(\pi_{\text{old}} \| \pi_\theta)$。
+    \item 写出带Lagrange乘子的泛函。
+    \item 利用变分法导出最优分布$p^*(x)$。
+    \item 验证$p^*(x)$是高斯分布$\mathcal{N}(\mu, \sigma^2)$。
 \end{subproblems}
 \end{problem}
 
-\begin{problem}[$\star\star$]
-\textbf{(GAE手算)} 给定一段轨迹的TD误差序列：$\delta_0 = 3$, $\delta_1 = -1$, $\delta_2 = 2$, $\delta_3 = 0$。$\gamma = 0.99$。
+\begin{problem}[计算题 $\star\star$]
+\textbf{KL散度与变分推断}。
 \begin{subproblems}
-    \item 计算$\lambda = 0$时的GAE：$\hat{A}_t^{(0)} = \delta_t$。
-    \item 计算$\lambda = 1$时的GAE：$\hat{A}_t^{(1)} = \sum_{l=0}^{\infty} \gamma^l \delta_{t+l}$（取$t=0$）。
-    \item 计算$\lambda = 0.95$时的GAE：$\hat{A}_0^{(\lambda)} = \sum_{l=0}^{3} (\gamma\lambda)^l \delta_l$（截断到已知项）。
-    \item 对比三个$\hat{A}_0$的值，解释$\lambda$如何控制偏差-方差权衡。
+    \item 写出KL散度$D_{KL}(q\|p) = \int q(x)\log\frac{q(x)}{p(x)}\,dx$的定义，并证明$D_{KL}(q\|p) \geq 0$（利用Jensen不等式）。
+    \item 在变分推断中，我们用$q(z)$近似后验$p(z|x)$。证明最小化$D_{KL}(q\|p(\cdot|x))$等价于最大化ELBO（Evidence Lower Bound）：
+    \[
+    \text{ELBO}(q) = \mathbb{E}_{q}[\log p(x,z)] - \mathbb{E}_q[\log q(z)]
+    \]
 \end{subproblems}
 \end{problem}
 
-%--- ADMM手算（对应第15讲）---
-\subsection*{十二、ADMM与分布式优化手算（第15讲）}
-
-\begin{problem}[$\star\star$]
-\textbf{(ADMM求解LASSO)} 用ADMM求解：$\min_x \frac{1}{2}\|Ax - b\|^2 + \lambda \|x\|_1$。取
-\[
-A = \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}, \quad b = \begin{pmatrix} 1 \\ 2 \end{pmatrix}, \quad \lambda = 0.5, \quad \rho = 1
-\]
-从$z^0 = (0,0)^\top$, $u^0 = (0,0)^\top$出发。
+\begin{problem}[概念题 $\star\star\star$]
+\textbf{最优控制与HJB方程}。
 \begin{subproblems}
-    \item $x$-更新：$x^{k+1} = (A^\top A + \rho I)^{-1}(A^\top b + \rho(z^k - u^k))$。计算$(A^\top A + \rho I)^{-1}$和$x^1$。
-    \item $z$-更新：$z^{k+1} = S_{\lambda/\rho}(x^{k+1} + u^k)$，其中$S_\kappa(v)_i = \text{sign}(v_i)\max(|v_i|-\kappa, 0)$是软阈值。计算$z^1$。
-    \item $u$-更新：$u^{k+1} = u^k + x^{k+1} - z^{k+1}$。计算$u^1$。
-    \item 再做一轮迭代，计算$(x^2, z^2, u^2)$。
+    \item 写出连续时间最优控制问题的一般形式：$\min_{u(\cdot)} \int_0^T L(x,u)\,dt + \Phi(x(T))$，s.t. $\dot{x} = f(x,u)$。
+    \item 写出Hamilton-Jacobi-Bellman（HJB）方程。
+    \item 解释HJB方程与Bellman方程（RL中的离散版本）之间的联系。
+    \item 伴随方法（adjoint method）如何与反向传播联系？在Neural ODE中，为什么adjoint method可以将显存从$O(L)$降到$O(1)$？
 \end{subproblems}
 \end{problem}
 
-\begin{problem}[$\star\star$]
-\textbf{(近端算子手算)} 计算以下函数的近端算子$\text{prox}_{\lambda f}(v) = \arg\min_x \left(f(x) + \frac{1}{2\lambda}\|x - v\|^2\right)$：
-\begin{subproblems}
-    \item $f(x) = \|x\|_1$（$\ell_1$范数），$v = (3, -0.3, 0.8)^\top$，$\lambda = 0.5$。
-    \item $f(x) = I_C(x)$（凸集$C = \{x : \|x\| \leq 1\}$的指示函数），$v = (3, 4)^\top$。
-    \item $f(x) = \frac{1}{2}x^\top Q x$（$Q$正定），一般$v$。
-    \item $f(x) = \|x\|_2$（$\ell_2$范数，非平方），$v = (3, 4)^\top$，$\lambda = 2$。
-\end{subproblems}
-\end{problem}
+%========================================
+% 第11章
+%========================================
 
-\begin{problem}[$\star\star$]
-\textbf{(Ring All-Reduce手算)} 3个GPU，每个GPU有梯度向量$g^{(k)} \in \mathbb{R}^3$：
-\[
-g^{(1)} = (1, 2, 3), \quad g^{(2)} = (4, 5, 6), \quad g^{(3)} = (7, 8, 9)
-\]
-按Ring All-Reduce算法：
-\begin{subproblems}
-    \item 将每个向量分为3个chunk（每个1个元素）。
-    \item 执行Reduce-Scatter阶段（2轮），写出每轮每个GPU上每个chunk的值。
-    \item 执行All-Gather阶段（2轮），写出最终每个GPU上的完整聚合结果。
-    \item 验证每个GPU都得到了$g^{(1)} + g^{(2)} + g^{(3)} = (12, 15, 18)$。
-    \item 总通信量是多少（发送数据量）？与朴素的"发到中心再广播"比较。
-\end{subproblems}
-\end{problem}
-
-%--- 变分法手算（对应第10讲）---
+% --- 按章节归并的补充题 ---
+\subsection*{补充手算题}
 \subsection*{十三、变分法与最优控制手算（第10讲）}
 
 \begin{problem}[$\star\star$]
@@ -1630,6 +1363,77 @@ T[y] = \int_0^{x_1} \sqrt{\frac{1 + y'^2}{2gy}} \, dx
 \end{problem}
 
 %--- Bandit与在线学习手算（对应第11讲）---
+\subsection*{补充编程题}
+\subsection*{第10讲：变分法与最优控制}
+
+\begin{problem}[$\star\star$]
+\textbf{Neural ODE迷你实现}
+
+用PyTorch实现一个最简单的Neural ODE：
+\begin{subproblems}
+    \item 定义一个2维ODE动力学$\dot{z} = f_\theta(z)$，其中$f_\theta$是两层MLP（2-32-2）。
+    \item 用\texttt{torchdiffeq.odeint}（或手写4阶Runge-Kutta）从$z(0)$积分到$z(1)$。
+    \item 目标：学习将同心圆上的点分类。生成数据：内圈标签0，外圈标签1。
+    \item 训练后，画出$z(t)$在$t \in [0,1]$上的连续变换过程（流场图）。
+\end{subproblems}
+\end{problem}
+
+%--- 第11讲 ---
+\section{第11讲：在线优化与Regret框架}
+
+\begin{problem}[概念题 $\star$]
+描述在线学习（online learning）的基本框架：每轮做什么决策？收到什么反馈？目标是什么？
+\end{problem}
+
+\begin{problem}[概念题 $\star$]
+写出Regret的定义：
+\[
+\text{Regret}_T = \sum_{t=1}^T \ell_t(x_t) - \min_{x \in \mathcal{X}} \sum_{t=1}^T \ell_t(x)
+\]
+解释为什么我们追求$\text{Regret}_T = o(T)$（即$\text{Regret}_T / T \to 0$），以及这意味着什么。
+\end{problem}
+
+\begin{problem}[证明题 $\star\star$]
+\textbf{Multiplicative Weights Update}。对于$N$个专家的在线决策问题，MWU算法如下：
+\begin{enumerate}[label=\arabic*.]
+    \item 初始化权重$w_1^i = 1$，$\forall i$
+    \item 每轮$t$：选择分布$p_t^i = w_t^i / \sum_j w_t^j$
+    \item 收到损失$\ell_t^i$后更新$w_{t+1}^i = w_t^i (1 - \eta \ell_t^i)$
+\end{enumerate}
+证明MWU的Regret界为$O(\sqrt{T \log N})$。
+\begin{hint}
+使用势函数$\Phi_t = \sum_i w_t^i$，分析$\Phi_t$的变化。
+\end{hint}
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+\textbf{Multi-Armed Bandit}。考虑$K=3$个臂的Bandit问题，真实期望奖励分别为$\mu_1=0.3$，$\mu_2=0.7$，$\mu_3=0.5$。
+\begin{subproblems}
+    \item 写出UCB1算法的选择准则：$a_t = \arg\max_i \left[\hat{\mu}_i + \sqrt{\frac{2\ln t}{n_i}}\right]$，并解释"乐观面对不确定"的含义。
+    \item 假设前3轮分别拉了臂1、2、3，奖励分别为0、1、0。计算第4轮每个臂的UCB值，决定拉哪个臂。
+    \item UCB1的Regret上界是$O(\sqrt{KT \log T})$。这与完全信息（在线学习）的$O(\sqrt{T \log K})$相比如何？信息缺失的代价体现在哪里？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+叙述Hoeffding不等式，并解释它如何用于构造置信区间。如果对一个均值为$\mu$的$[0,1]$随机变量采样$n$次，样本均值$\hat{\mu}$满足$|\hat{\mu} - \mu| \leq \epsilon$的概率至少为多少？
+\end{problem}
+
+\begin{problem}[思考题 $\star\star\star$]
+课程提出"Regret是统一语言"，从在线学习到Bandit到MDP，Regret框架如何统一它们？
+\begin{subproblems}
+    \item 在线学习的Regret与Bandit的Regret在定义上有什么区别？
+    \item MDP的Regret如何定义？
+    \item 这三者的Regret下界分别是多少？信息量从多到少如何影响Regret？
+\end{subproblems}
+\end{problem}
+
+%========================================
+% 第12章
+%========================================
+
+% --- 按章节归并的补充题 ---
+\subsection*{补充手算题}
 \subsection*{十四、Bandit与在线学习手算（第11讲）}
 
 \begin{problem}[$\star\star$]
@@ -1738,227 +1542,7 @@ OGD更新：$\tilde{x}_{t+1} = x_t - \eta \nabla \ell_t(x_t)$，$x_{t+1} = \Pi_\
 %========================================
 %========================================
 \newpage
-\section*{补充：小规模编程题}
-\addcontentsline{toc}{section}{补充：小规模编程题}
-\setcounter{problem}{0}
-\renewcommand{\theproblem}{编.\arabic{problem}}
-
-\bigskip
-\begin{center}
-\textit{以下编程题均可在 50 行以内完成（不含绘图），使用 Python/NumPy/PyTorch 即可。\\
-建议先在纸上写出伪代码，再上机实现。}
-\end{center}
-
-%--- 第1讲 ---
-\subsection*{第1讲：计算复杂性}
-
-\begin{problem}[$\star$]
-\textbf{暴力 vs 贪心 vs 2-opt：TSP实验}
-
-生成$n$个二维平面上的随机点作为城市。分别实现：
-\begin{subproblems}
-    \item \textbf{暴力搜索}：遍历所有排列，找最短路径。用 \texttt{itertools.permutations} 即可。
-    \item \textbf{贪心}：每次走到最近的未访问城市。
-    \item \textbf{2-opt}：从贪心解出发，反复尝试翻转子路径，直到无法改进。
-\end{subproblems}
-分别在$n=8,10,12$上运行，记录运行时间和路径长度。画表格比较三者。$n=12$时暴力法要多久？
-
-\begin{hint}
-2-opt的核心循环：对所有$(i,j)$对，检查将路径$[i..j]$翻转后总长度是否减小。
-\end{hint}
-\end{problem}
-
-\begin{problem}[$\star$]
-\textbf{SAT求解器体验}
-
-用Python实现一个暴力SAT求解器：输入CNF公式（子句列表），枚举所有$2^n$种变量赋值，检查是否满足。
-\begin{subproblems}
-    \item 对以下CNF公式求解：$(x_1 \lor x_2) \land (\neg x_1 \lor x_3) \land (\neg x_2 \lor \neg x_3)$。
-    \item 随机生成含$n$个变量、$m$个子句（每个子句3个文字）的3-SAT实例。测试$n=10,15,20$时的求解时间。
-    \item 固定$n=20$，画出"可满足概率"随$m/n$比值变化的曲线（子句密度相变现象）。
-\end{subproblems}
-\end{problem}
-
-%--- 第2讲 ---
-\subsection*{第2讲：凸优化与KKT}
-
-\begin{problem}[$\star\star$]
-\textbf{用CVXPY求解并验证KKT}
-
-考虑投资组合优化问题：
-\[
-\min_w \quad w^\top \Sigma w \quad \text{s.t.} \quad \mu^\top w \geq r_{\min}, \quad \mathbf{1}^\top w = 1, \quad w \geq 0
-\]
-其中$\Sigma$是$5\times 5$的协方差矩阵，$\mu$是期望收益向量。
-\begin{subproblems}
-    \item 随机生成$\Sigma$（半正定）和$\mu$，用CVXPY求解。
-    \item 从求解结果中提取对偶变量，手动验证KKT条件（梯度条件、互补松弛）。
-    \item 改变$r_{\min}$的值，画出有效前沿（efficient frontier）：横轴标准差，纵轴期望收益。
-    \item 验证"影子价格"：$r_{\min}$增加$\epsilon$后，最优目标值变化是否约为$\lambda^* \cdot \epsilon$？
-\end{subproblems}
-\end{problem}
-
-%--- 第3讲 ---
-\subsection*{第3讲：LP对偶与近似算法}
-
-\begin{problem}[$\star\star$]
-\textbf{Vertex Cover: LP松弛舍入}
-
-\begin{subproblems}
-    \item 用 \texttt{networkx} 随机生成一个$n=20$的Erd\H{o}s-R\'{e}nyi图$G(n, p=0.3)$。
-    \item 用CVXPY求解最小顶点覆盖的LP松弛。
-    \item 实现舍入算法（$x_v \geq 0.5$则选入覆盖），验证结果是合法的顶点覆盖。
-    \item 比较LP最优值、舍入解大小、（若$n$不太大可暴力搜索）真实最小覆盖大小。验证$\text{ALG} \leq 2\cdot\text{OPT}$。
-\end{subproblems}
-\end{problem}
-
-%--- 第4讲 ---
-\subsection*{第4讲：算法范式与GPU化}
-
-\begin{problem}[$\star\star$]
-\textbf{编辑距离的GPU对角线并行}
-
-\begin{subproblems}
-    \item 实现标准的$O(mn)$ CPU版本编辑距离。
-    \item 实现GPU对角线并行版本：按反对角线$k=0,1,\ldots,m+n$扫描，每条反对角线内的元素用PyTorch向量化计算。
-    \item 生成两个长度为5000的随机字符串。比较CPU版和GPU版的运行时间。
-    \item 画出对角线填充的动态示意图（例如在$10\times 10$的小例子上，用颜色表示填充顺序）。
-\end{subproblems}
-\end{problem}
-
-%--- 第5讲 ---
-\subsection*{第5讲：梯度法与预条件}
-
-\begin{problem}[$\star$]
-\textbf{梯度下降可视化}
-
-对二维Rosenbrock函数$f(x,y) = (1-x)^2 + 100(y-x^2)^2$：
-\begin{subproblems}
-    \item 实现梯度下降（手动计算梯度），从$(-1, 1)$出发。
-    \item 分别尝试步长$\eta = 10^{-4}, 10^{-3}, 5\times 10^{-3}$，各跑5000步。
-    \item 在等高线图上画出三条轨迹，观察步长对收敛的影响。
-    \item 实现带Backtracking线搜索（Armijo准则）的版本，同一初始点运行，对比效果。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[$\star\star$]
-\textbf{条件数实验}
-
-构造$n=100$维的二次函数$f(x)=\frac{1}{2}x^\top Ax - b^\top x$，其中$A$是对角矩阵$A = \text{diag}(1, 2, \ldots, 100)$，$b = \mathbf{1}$。
-\begin{subproblems}
-    \item 用梯度下降（步长$\eta = 2/(\lambda_{\min}+\lambda_{\max})$），记录每步的$\|x_k - x^*\|$。需要多少步使误差降到$10^{-6}$？
-    \item 用牛顿法，记录同样的收敛曲线。需要几步？
-    \item 对角预条件$P = \text{diag}(A)$的预条件GD需要多少步？
-    \item 改为$A = \text{diag}(1, 1, \ldots, 1, 1000)$（$\kappa=1000$），重复实验。画4条收敛曲线在一张图上。
-\end{subproblems}
-\end{problem}
-
-%--- 第6讲 ---
-\subsection*{第6讲：流形优化}
-
-\begin{problem}[$\star\star$]
-\textbf{球面上的Riemannian梯度下降}
-
-求矩阵$A$的最小特征值和对应特征向量：$\min_{x \in S^{n-1}} x^\top A x$。
-\begin{subproblems}
-    \item 生成$n=10$的随机对称矩阵$A$。
-    \item 实现Riemannian梯度下降：
-    \begin{enumerate}[label=\arabic*.]
-        \item 欧氏梯度$g = 2Ax$
-        \item 投影到切空间$\tilde{g} = g - (x^\top g)x$
-        \item 更新$\tilde{x} = x - \eta \tilde{g}$
-        \item Retraction（归一化）$x = \tilde{x}/\|\tilde{x}\|$
-    \end{enumerate}
-    \item 画出每步$x^\top A x$的值，与\texttt{np.linalg.eigh}给出的最小特征值比较。
-    \item 改变步长$\eta$，观察收敛速度和稳定性。
-\end{subproblems}
-\end{problem}
-
-%--- 第7讲 ---
-\subsection*{第7讲：随机化算法}
-
-\begin{problem}[$\star\star$]
-\textbf{随机SVD实现}
-
-\begin{subproblems}
-    \item 生成一个$1000\times 1000$的低秩（rank-10）加噪声矩阵：$A = UV^\top + 0.01 \cdot E$，其中$U,V \in \mathbb{R}^{1000\times 10}$，$E$是随机噪声。
-    \item 实现随机SVD算法（约15行代码）：随机投影 $\to$ QR $\to$ 投影回 $\to$ 小SVD。
-    \item 与\texttt{np.linalg.svd}比较：(i) 前10个奇异值的误差；(ii) 运行时间。
-    \item 增加过采样参数$p$从0到20，画出近似误差随$p$的变化曲线。
-\end{subproblems}
-\end{problem}
-
-%--- 第8讲 ---
-\subsection*{第8讲：随机优化}
-
-\begin{problem}[$\star\star$]
-\textbf{优化器赛马：SGD/Momentum/Adam}
-
-用PyTorch在MNIST上训练一个简单的两层全连接网络（784-128-10）：
-\begin{subproblems}
-    \item 分别使用SGD（$\eta=0.01$）、SGD+Momentum（$\mu=0.9$）、Adam（默认参数），各训练10个epoch。
-    \item 画出三条训练loss曲线和三条测试accuracy曲线。
-    \item 对SGD，分别尝试batch size $\in \{16, 64, 256, 1024\}$，画出"每epoch时间 vs 收敛速度"的trade-off。
-    \item 实现学习率warmup（前5\%步线性增长），观察对大batch ($\geq 512$) 训练稳定性的影响。
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[$\star\star\star$]
-\textbf{从零实现Adam}
-
-不使用\texttt{torch.optim}，手写Adam优化器（约20行核心代码）：
-\begin{subproblems}
-    \item 实现完整的Adam更新：$m$和$v$的指数移动平均、偏差修正、参数更新。
-    \item 在Rosenbrock函数上与\texttt{torch.optim.Adam}的结果对比，验证实现正确。
-    \item 去掉偏差修正，观察训练前期的行为差异。
-    \item 将$\beta_2$改为0.9（远小于默认0.999），观察收敛行为的变化。
-\end{subproblems}
-\end{problem}
-
-%--- 第9讲 ---
-\subsection*{第9讲：深度学习优化理论}
-
-\begin{problem}[$\star\star$]
-\textbf{隐式正则化验证}
-
-\begin{subproblems}
-    \item 生成欠定线性回归数据：$X \in \mathbb{R}^{20 \times 100}$（随机高斯），$y = Xw_{\text{true}} + \epsilon$。
-    \item 从$w_0 = 0$出发做梯度下降直到$\|Xw - y\| < 10^{-6}$。记录$\|w_T\|_2$。
-    \item 计算最小范数解$w^* = X^\top(XX^\top)^{-1}y$，验证$\|w_T - w^*\|$是否很小。
-    \item 改为从$w_0 = \mathbf{10}$（大初始值）出发，GD收敛到的解$\|w\|_2$是否还是最小范数？为什么？
-\end{subproblems}
-\end{problem}
-
-\begin{problem}[$\star\star\star$]
-\textbf{Hessian谱的随机Lanczos估计}
-
-\begin{subproblems}
-    \item 在MNIST上训练一个小的全连接网络（784-64-10）。
-    \item 用PyTorch的\texttt{torch.autograd.functional.hvp}（Hessian-vector product）实现随机Lanczos算法，估计Hessian的前20个特征值。
-    \item 画出Hessian特征值的直方图（随机采样100个特征值）。是否观察到"bulk + outliers"结构？
-    \item 在训练过程中（每个epoch结束时）重复上述估计，画出最大特征值随训练的变化曲线。
-\end{subproblems}
-\begin{hint}
-Lanczos算法核心：用$Hv$（而非完整$H$）做三对角化。每步只需一次Hessian-vector product，复杂度$O(d)$而非$O(d^2)$。
-\end{hint}
-\end{problem}
-
-%--- 第10讲 ---
-\subsection*{第10讲：变分法与最优控制}
-
-\begin{problem}[$\star\star$]
-\textbf{Neural ODE迷你实现}
-
-用PyTorch实现一个最简单的Neural ODE：
-\begin{subproblems}
-    \item 定义一个2维ODE动力学$\dot{z} = f_\theta(z)$，其中$f_\theta$是两层MLP（2-32-2）。
-    \item 用\texttt{torchdiffeq.odeint}（或手写4阶Runge-Kutta）从$z(0)$积分到$z(1)$。
-    \item 目标：学习将同心圆上的点分类。生成数据：内圈标签0，外圈标签1。
-    \item 训练后，画出$z(t)$在$t \in [0,1]$上的连续变换过程（流场图）。
-\end{subproblems}
-\end{problem}
-
-%--- 第11讲 ---
+\subsection*{补充编程题}
 \subsection*{第11讲：在线优化与Bandit}
 
 \begin{problem}[$\star\star$]
@@ -1975,6 +1559,123 @@ Lanczos算法核心：用$Hv$（而非完整$H$）做三对角化。每步只需
 \end{problem}
 
 %--- 第12讲 ---
+\section{第12讲：MDP与Tabular RL理论}
+
+\begin{problem}[概念题 $\star$]
+定义MDP的五元组$(S, A, P, R, \gamma)$，并分别解释每个元素的含义。写出有限时间（episodic）和无限时间（discounted）两种设定下的目标函数。
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+\textbf{Bellman方程}。考虑一个简单的GridWorld：$2\times 2$的网格，状态$\{s_1, s_2, s_3, s_4\}$（左上、右上、左下、右下），动作$\{$上、下、左、右$\}$。$s_4$是终点（奖励+1），每步奖励为$-0.04$，折扣因子$\gamma = 0.9$。
+\begin{subproblems}
+    \item 写出最优Bellman方程$V^*(s) = \max_a \left[R(s,a) + \gamma \sum_{s'} P(s'|s,a)V^*(s')\right]$。
+    \item 使用值迭代（Value Iteration），从$V_0(s) = 0$出发，计算$V_1$和$V_2$。
+    \item 值迭代为什么一定收敛？与Bellman算子的收缩映射性质有什么关系？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[证明题 $\star\star$]
+证明Bellman最优算子$\mathcal{T}$是$\gamma$-收缩映射，即对任意值函数$V_1, V_2$：
+\[
+\|\mathcal{T}V_1 - \mathcal{T}V_2\|_\infty \leq \gamma \|V_1 - V_2\|_\infty
+\]
+由此说明值迭代的收敛性（Banach不动点定理）。
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+比较值迭代（Value Iteration）和策略迭代（Policy Iteration）：
+\begin{subproblems}
+    \item 分别描述两种算法的步骤。
+    \item 哪种算法的每步计算量更大？哪种收敛更快（迭代次数）？
+    \item 策略迭代为什么能保证在有限步内收敛？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star\star$]
+\textbf{UCB-VI算法}。
+\begin{subproblems}
+    \item UCB-VI是如何将Bandit中的"乐观原则"推广到MDP的？
+    \item 其Regret上界为$\tilde{O}(\sqrt{H^3 S A T})$，其中$H$是episode长度，$S$是状态数，$A$是动作数，$T$是总步数。解释每个因子的含义。
+    \item Regret下界为$\Omega(\sqrt{HSAT})$。与上界相比，差距在哪里？
+    \item 什么是$(\varepsilon, \delta)$-PAC？它与Regret有什么关系？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[思考题 $\star\star$]
+GPU上的值迭代：
+\begin{subproblems}
+    \item 为什么值迭代适合GPU并行？哪些计算可以并行？
+    \item 当状态空间$|S| = 100000$时，为什么GPU版本比CPU版本快50倍？
+    \item 表格方法的根本限制是什么？为什么需要函数逼近？
+\end{subproblems}
+\end{problem}
+
+%========================================
+% 第13章
+%========================================
+
+% --- 按章节归并的补充题 ---
+\subsection*{补充手算题}
+\subsection*{九、Bellman方程与值迭代手算（第12讲）}
+
+\begin{problem}[$\star\star$]
+\textbf{(Sutton \& Barto风格)} 考虑$3 \times 3$ GridWorld：
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+$s_1$ & $s_2$ & $s_3$ \\
+\hline
+$s_4$ & $s_5$ & $s_6$ \\
+\hline
+$s_7$ & $s_8$ & $s_9$ \\
+\hline
+\end{tabular}
+\end{center}
+$s_9$是目标状态（到达得$+10$奖励），其余每步$-1$奖励。动作：上、下、左、右（确定性）。碰墙不动。$\gamma = 0.9$。
+\begin{subproblems}
+    \item 从$V_0 = \mathbf{0}$出发做值迭代。手算$V_1(s)$（所有9个状态）。
+    \item 手算$V_2(s)$（所有9个状态）。
+    \item 从$V_2$中提取贪心策略$\pi_2(s) = \arg\max_a [R + \gamma V_2(s')]$。这个策略合理吗？
+    \item 如果所有状态同时更新（同步），与按某个顺序逐个更新（异步/Gauss-Seidel）相比，结果有什么不同？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[$\star\star$]
+\textbf{(策略评估手算)} 给定策略$\pi$：在$s_1$选右，在$s_2$选右，在$s_3$选下。使用线性方程组法（而非迭代法）求$V^\pi$。
+\begin{center}
+$s_1 \xrightarrow[\text{r=1}]{\text{右}} s_2 \xrightarrow[\text{r=2}]{\text{右}} s_3 \xrightarrow[\text{r=0}]{\text{下}} \text{终止}$
+\end{center}
+$\gamma = 0.9$。
+\begin{subproblems}
+    \item 写出Bellman期望方程组：$V^\pi(s) = R(s,\pi(s)) + \gamma V^\pi(s')$。
+    \item 求解线性方程组得到$V^\pi(s_1), V^\pi(s_2), V^\pi(s_3)$。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[$\star\star\star$]
+\textbf{(策略迭代完整手算)} 考虑MDP：$S = \{s_1, s_2\}$，$A = \{a, b\}$，$\gamma = 0.5$。
+\[
+P(s_1|s_1,a) = 0.7, \quad P(s_2|s_1,a) = 0.3, \quad R(s_1,a) = 5
+\]
+\[
+P(s_1|s_1,b) = 0.3, \quad P(s_2|s_1,b) = 0.7, \quad R(s_1,b) = 10
+\]
+\[
+P(s_1|s_2,a) = 0.5, \quad P(s_2|s_2,a) = 0.5, \quad R(s_2,a) = -1
+\]
+\[
+P(s_1|s_2,b) = 0.9, \quad P(s_2|s_2,b) = 0.1, \quad R(s_2,b) = 2
+\]
+\begin{subproblems}
+    \item \textbf{策略评估}：从初始策略$\pi_0(s_1) = a, \pi_0(s_2) = a$出发，求解$V^{\pi_0}(s_1), V^{\pi_0}(s_2)$（线性方程组）。
+    \item \textbf{策略改进}：对每个状态，检查每个动作的$Q$值：$Q^{\pi_0}(s,a') = R(s,a') + \gamma \sum_{s'} P(s'|s,a')V^{\pi_0}(s')$。确定改进后的策略$\pi_1$。
+    \item 对$\pi_1$重复策略评估和策略改进，直到策略不再变化。
+    \item 与值迭代（从$V_0 = 0$出发迭代5轮）的结果比较。
+\end{subproblems}
+\end{problem}
+
+%--- TD学习与策略梯度手算（对应第13讲）---
+\subsection*{补充编程题}
 \subsection*{第12讲：MDP与Tabular RL}
 
 \begin{problem}[$\star\star$]
@@ -2001,6 +1702,104 @@ Lanczos算法核心：用$Hv$（而非完整$H$）做三对角化。每步只需
 \end{problem}
 
 %--- 第13讲 ---
+\section{第13讲：深度RL与策略优化}
+
+\begin{problem}[概念题 $\star$]
+解释DQN（Deep Q-Network）的核心思想：
+\begin{subproblems}
+    \item 为什么需要经验回放（Experience Replay）？
+    \item 为什么需要目标网络（Target Network）？
+    \item DQN使用的损失函数是什么？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[证明题 $\star\star$]
+\textbf{策略梯度定理}。证明：
+\[
+\nabla_\theta J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}\left[\sum_{t=0}^{T} \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot Q^{\pi_\theta}(s_t, a_t)\right]
+\]
+\begin{hint}
+从$J(\theta) = \mathbb{E}_{\tau \sim \pi_\theta}[R(\tau)]$出发，利用$\nabla_\theta \pi_\theta = \pi_\theta \nabla_\theta \log \pi_\theta$。
+\end{hint}
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+\textbf{REINFORCE与方差缩减}。
+\begin{subproblems}
+    \item 写出REINFORCE算法的梯度估计：$\hat{g} = \sum_t \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot G_t$，其中$G_t$是什么？
+    \item 引入baseline $b(s_t)$后，梯度估计变为$\hat{g} = \sum_t \nabla_\theta \log \pi_\theta(a_t|s_t) \cdot (G_t - b(s_t))$。证明任意baseline $b$不改变梯度的期望（即仍然无偏）。
+    \item 最优baseline $b^*(s)$是什么？为什么通常取$b(s) \approx V^{\pi}(s)$？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+\textbf{Actor-Critic方法}。
+\begin{subproblems}
+    \item Actor和Critic分别学什么？
+    \item 什么是TD误差（Temporal Difference error）$\delta_t = r_t + \gamma V(s_{t+1}) - V(s_t)$？它在Actor-Critic中起什么作用？
+    \item 与REINFORCE相比，Actor-Critic的优势和劣势分别是什么？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[计算题 $\star\star\star$]
+\textbf{自然梯度与Fisher信息矩阵}。
+\begin{subproblems}
+    \item 写出Fisher信息矩阵的定义：$F(\theta) = \mathbb{E}_{\pi_\theta}\left[\nabla_\theta \log \pi_\theta(a|s) \nabla_\theta \log \pi_\theta(a|s)^\top\right]$。
+    \item 自然梯度更新为$\theta \leftarrow \theta - \eta F^{-1} \nabla_\theta J$。解释为什么这比普通梯度更好（参数化不变性）。
+    \item Fisher信息矩阵与KL散度有什么关系？（提示：$F$是KL散度的Hessian）
+    \item 这与课程第5讲的"预条件"暗线有什么联系？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+\textbf{TRPO}。
+\begin{subproblems}
+    \item 写出TRPO的优化问题：$\max_\theta L(\theta)$ s.t. $D_{KL}(\pi_{\theta_\text{old}} \| \pi_\theta) \leq \delta$。
+    \item 为什么需要信任域约束？如果不加约束会怎样？
+    \item TRPO使用什么方法近似求解这个约束优化问题？
+\end{subproblems}
+\end{problem}
+
+%========================================
+% 第14章
+%========================================
+
+% --- 按章节归并的补充题 ---
+\subsection*{补充手算题}
+\subsection*{十、TD学习与策略梯度手算（第13讲）}
+
+\begin{problem}[$\star\star$]
+\textbf{(TD(0)手算)} 给定以下经验轨迹（在同一策略$\pi$下）和$\gamma = 1$：
+\begin{align*}
+&\text{轨迹1: } s_1 \xrightarrow{r=0} s_2 \xrightarrow{r=1} \text{终止} \\
+&\text{轨迹2: } s_1 \xrightarrow{r=0} s_2 \xrightarrow{r=1} \text{终止} \\
+&\text{轨迹3: } s_2 \xrightarrow{r=0} \text{终止}
+\end{align*}
+初始$V(s_1) = V(s_2) = 0$，学习率$\alpha = 0.1$。
+\begin{subproblems}
+    \item 依次用每条轨迹的每一步做TD(0)更新：$V(s) \leftarrow V(s) + \alpha[r + \gamma V(s') - V(s)]$。写出每次更新后$V(s_1)$和$V(s_2)$的值。
+    \item 蒙特卡洛方法（first-visit）得到的$V(s_1)$和$V(s_2)$估计是多少？
+    \item 两种方法的结果有什么区别？解释原因。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[$\star\star\star$]
+\textbf{(REINFORCE手算)} 考虑一个1状态的Bandit问题：$|S|=1$，$A=\{0,1\}$。策略参数化为softmax：
+\[
+\pi_\theta(a=1) = \frac{e^\theta}{1 + e^\theta} = \sigma(\theta), \quad \pi_\theta(a=0) = 1 - \sigma(\theta)
+\]
+奖励$R(a=1) = 1$，$R(a=0) = 0$。取$\theta_0 = 0$（初始时两个动作等概率），学习率$\eta = 0.5$。
+\begin{subproblems}
+    \item 计算$\nabla_\theta \log \pi_\theta(a=1)$和$\nabla_\theta \log \pi_\theta(a=0)$。
+    \item 计算策略梯度的期望$\mathbb{E}_{a \sim \pi_\theta}[\nabla_\theta \log \pi_\theta(a) \cdot R(a)]$在$\theta_0 = 0$处的值。
+    \item 假设实际采样到$a=1$（奖励1），REINFORCE更新后$\theta_1 = ?$
+    \item 假设接下来采样到$a=0$（奖励0），更新$\theta_2 = ?$
+    \item 引入baseline $b = 0.5$（期望奖励），重新计算(c)(d)，比较方差是否减小。
+\end{subproblems}
+\end{problem}
+
+%--- PPO手算（对应第14讲）---
+\subsection*{补充编程题}
 \subsection*{第13讲：深度RL与策略优化}
 
 \begin{problem}[$\star\star$]
@@ -2019,6 +1818,92 @@ Lanczos算法核心：用$Hv$（而非完整$H$）做三对角化。每步只需
 \end{problem}
 
 %--- 第14讲 ---
+\section{第14讲：PPO——约束优化的巅峰}
+
+\begin{problem}[概念题 $\star$]
+PPO有两个变体：PPO-Penalty和PPO-Clip。分别写出它们的目标函数。
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+\textbf{PPO-Clip}。定义概率比$r_t(\theta) = \frac{\pi_\theta(a_t|s_t)}{\pi_{\theta_\text{old}}(a_t|s_t)}$。
+\begin{subproblems}
+    \item PPO-Clip的目标函数为
+    \[
+    L^{\text{CLIP}}(\theta) = \mathbb{E}_t\left[\min\left(r_t(\theta)\hat{A}_t, \;\text{clip}(r_t(\theta), 1-\epsilon, 1+\epsilon)\hat{A}_t\right)\right]
+    \]
+    其中$\hat{A}_t$是优势函数估计。解释clipping操作的直觉：当$\hat{A}_t > 0$和$\hat{A}_t < 0$时，clipping分别限制了什么？
+    \item 取$\epsilon = 0.2$。如果$r_t = 1.5$，$\hat{A}_t = 2$，计算clipped目标值。
+    \item 如果$r_t = 0.6$，$\hat{A}_t = -1$，计算clipped目标值。
+    \item 为什么说PPO-Clip近似实现了信任域约束？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+\textbf{GAE（Generalized Advantage Estimation）}。
+\begin{subproblems}
+    \item 写出$\lambda$-return的定义和GAE的公式：$\hat{A}_t^{\text{GAE}(\gamma,\lambda)} = \sum_{l=0}^{\infty}(\gamma\lambda)^l \delta_{t+l}$。
+    \item $\lambda = 0$和$\lambda = 1$分别对应什么？各自的偏差和方差如何？
+    \item 为什么GAE是偏差-方差trade-off的有效工具？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[思考题 $\star\star$]
+从课程的"对偶"暗线角度理解PPO的演进：
+\begin{subproblems}
+    \item TRPO：$\max L(\theta)$ s.t. $\text{KL} \leq \delta$（硬约束）。
+    \item PPO-Penalty：$\max L(\theta) - \beta \cdot \text{KL}$（软惩罚）。这与Lagrangian对偶的关系是什么？
+    \item PPO-Clip：用clipping近似信任域。这从第2讲的KKT到第14讲的PPO，"约束$\to$对偶$\to$一阶"的演进说明了什么？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star\star$]
+\textbf{RLHF中的PPO}。
+\begin{subproblems}
+    \item 描述RLHF的三个阶段：SFT $\to$ 奖励模型训练 $\to$ PPO微调。
+    \item 在PPO微调阶段，目标函数是什么？为什么需要加入KL惩罚项$\beta \cdot D_{KL}(\pi_\theta \| \pi_{\text{ref}})$？
+    \item PPO在RLHF中面临哪些工程挑战（如reward hacking、训练不稳定）？
+\end{subproblems}
+\end{problem}
+
+%========================================
+% 第15章
+%========================================
+
+% --- 按章节归并的补充题 ---
+\subsection*{补充手算题}
+\subsection*{十一、PPO相关手算（第14讲）}
+
+\begin{problem}[$\star\star$]
+\textbf{(重要性采样手算)} 旧策略$\pi_{\text{old}}$和新策略$\pi_\theta$在某状态$s$下的动作概率如下：
+\begin{center}
+\begin{tabular}{c|ccc}
+动作 & $a_1$ & $a_2$ & $a_3$ \\
+\hline
+$\pi_{\text{old}}(a|s)$ & 0.5 & 0.3 & 0.2 \\
+$\pi_\theta(a|s)$ & 0.6 & 0.3 & 0.1
+\end{tabular}
+\end{center}
+优势估计$\hat{A}(s,a_1) = 2$, $\hat{A}(s,a_2) = -1$, $\hat{A}(s,a_3) = 0$。
+\begin{subproblems}
+    \item 计算每个动作的概率比$r(a) = \pi_\theta(a|s)/\pi_{\text{old}}(a|s)$。
+    \item 计算PPO-Clip目标（$\epsilon = 0.2$）在每个动作上的值。
+    \item 计算PPO-Clip目标的期望$L^{\text{CLIP}}$（在$\pi_{\text{old}}$下采样）。
+    \item 计算$D_{KL}(\pi_{\text{old}} \| \pi_\theta)$。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[$\star\star$]
+\textbf{(GAE手算)} 给定一段轨迹的TD误差序列：$\delta_0 = 3$, $\delta_1 = -1$, $\delta_2 = 2$, $\delta_3 = 0$。$\gamma = 0.99$。
+\begin{subproblems}
+    \item 计算$\lambda = 0$时的GAE：$\hat{A}_t^{(0)} = \delta_t$。
+    \item 计算$\lambda = 1$时的GAE：$\hat{A}_t^{(1)} = \sum_{l=0}^{\infty} \gamma^l \delta_{t+l}$（取$t=0$）。
+    \item 计算$\lambda = 0.95$时的GAE：$\hat{A}_0^{(\lambda)} = \sum_{l=0}^{3} (\gamma\lambda)^l \delta_l$（截断到已知项）。
+    \item 对比三个$\hat{A}_0$的值，解释$\lambda$如何控制偏差-方差权衡。
+\end{subproblems}
+\end{problem}
+
+%--- ADMM手算（对应第15讲）---
+\subsection*{补充编程题}
 \subsection*{第14讲：PPO}
 
 \begin{problem}[$\star\star\star$]
@@ -2036,6 +1921,112 @@ Lanczos算法核心：用$Hv$（而非完整$H$）做三对角化。每步只需
 \end{problem}
 
 %--- 第15讲 ---
+\section{第15讲：分布式优化}
+
+\begin{problem}[概念题 $\star$]
+解释分布式优化中数据并行（Data Parallelism）和模型并行（Model Parallelism）的区别。各自适用于什么场景？
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+\textbf{ADMM}。考虑问题$\min f(x) + g(z)$ s.t. $Ax + Bz = c$。ADMM的迭代步骤为：
+\begin{align*}
+x^{k+1} &= \arg\min_x \left(f(x) + \frac{\rho}{2}\|Ax + Bz^k - c + u^k\|_2^2\right) \\
+z^{k+1} &= \arg\min_z \left(g(z) + \frac{\rho}{2}\|Ax^{k+1} + Bz - c + u^k\|_2^2\right) \\
+u^{k+1} &= u^k + Ax^{k+1} + Bz^{k+1} - c
+\end{align*}
+\begin{subproblems}
+    \item 用ADMM求解LASSO问题：$\min \frac{1}{2}\|Ax - b\|_2^2 + \lambda\|z\|_1$ s.t. $x = z$。写出$x$-更新和$z$-更新的显式公式。
+    \item $z$-更新涉及的近端算子（proximal operator）$\text{prox}_{\lambda\|\cdot\|_1}(v) = ?$
+    \item 解释ADMM中对偶上升（dual ascent）的思想。$u$的更新有什么含义？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+\textbf{数据并行SGD}。
+\begin{subproblems}
+    \item 描述同步SGD（Synchronous SGD）的过程：每个worker计算本地梯度，然后如何聚合？
+    \item 异步SGD与同步SGD相比有什么优缺点？
+    \item 什么是"掉队者问题"（straggler problem）？如何缓解？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[计算题 $\star\star$]
+\textbf{All-Reduce}。$K$个GPU需要汇总各自的梯度向量（每个长度为$n$）。
+\begin{subproblems}
+    \item 朴素方法（所有GPU发送到一个master，再广播）的通信量是多少？
+    \item Ring All-Reduce算法的通信量是多少？解释其工作原理。
+    \item 为什么Ring All-Reduce对GPU集群更友好？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[概念题 $\star\star$]
+\textbf{梯度压缩}。
+\begin{subproblems}
+    \item 解释Top-K梯度稀疏化的思想：只传输最大的$K$个梯度分量。
+    \item 量化压缩（如1-bit SGD）如何工作？其核心假设是什么？
+    \item 梯度压缩引入的误差如何影响收敛？如何用误差反馈（error feedback）缓解？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[思考题 $\star\star\star$]
+\textbf{联邦学习}。
+\begin{subproblems}
+    \item FedAvg算法的步骤是什么？与数据并行SGD有什么区别？
+    \item 联邦学习面临的主要挑战有哪些？（如非i.i.d.数据、通信效率、隐私）
+    \item 从优化的角度，为什么非i.i.d.数据分布会影响FedAvg的收敛性？
+\end{subproblems}
+\end{problem}
+
+%========================================
+% 综合题
+%========================================
+\newpage
+
+% --- 按章节归并的补充题 ---
+\subsection*{补充手算题}
+\subsection*{十二、ADMM与分布式优化手算（第15讲）}
+
+\begin{problem}[$\star\star$]
+\textbf{(ADMM求解LASSO)} 用ADMM求解：$\min_x \frac{1}{2}\|Ax - b\|^2 + \lambda \|x\|_1$。取
+\[
+A = \begin{pmatrix} 1 & 2 \\ 3 & 4 \end{pmatrix}, \quad b = \begin{pmatrix} 1 \\ 2 \end{pmatrix}, \quad \lambda = 0.5, \quad \rho = 1
+\]
+从$z^0 = (0,0)^\top$, $u^0 = (0,0)^\top$出发。
+\begin{subproblems}
+    \item $x$-更新：$x^{k+1} = (A^\top A + \rho I)^{-1}(A^\top b + \rho(z^k - u^k))$。计算$(A^\top A + \rho I)^{-1}$和$x^1$。
+    \item $z$-更新：$z^{k+1} = S_{\lambda/\rho}(x^{k+1} + u^k)$，其中$S_\kappa(v)_i = \text{sign}(v_i)\max(|v_i|-\kappa, 0)$是软阈值。计算$z^1$。
+    \item $u$-更新：$u^{k+1} = u^k + x^{k+1} - z^{k+1}$。计算$u^1$。
+    \item 再做一轮迭代，计算$(x^2, z^2, u^2)$。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[$\star\star$]
+\textbf{(近端算子手算)} 计算以下函数的近端算子$\text{prox}_{\lambda f}(v) = \arg\min_x \left(f(x) + \frac{1}{2\lambda}\|x - v\|^2\right)$：
+\begin{subproblems}
+    \item $f(x) = \|x\|_1$（$\ell_1$范数），$v = (3, -0.3, 0.8)^\top$，$\lambda = 0.5$。
+    \item $f(x) = I_C(x)$（凸集$C = \{x : \|x\| \leq 1\}$的指示函数），$v = (3, 4)^\top$。
+    \item $f(x) = \frac{1}{2}x^\top Q x$（$Q$正定），一般$v$。
+    \item $f(x) = \|x\|_2$（$\ell_2$范数，非平方），$v = (3, 4)^\top$，$\lambda = 2$。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[$\star\star$]
+\textbf{(Ring All-Reduce手算)} 3个GPU，每个GPU有梯度向量$g^{(k)} \in \mathbb{R}^3$：
+\[
+g^{(1)} = (1, 2, 3), \quad g^{(2)} = (4, 5, 6), \quad g^{(3)} = (7, 8, 9)
+\]
+按Ring All-Reduce算法：
+\begin{subproblems}
+    \item 将每个向量分为3个chunk（每个1个元素）。
+    \item 执行Reduce-Scatter阶段（2轮），写出每轮每个GPU上每个chunk的值。
+    \item 执行All-Gather阶段（2轮），写出最终每个GPU上的完整聚合结果。
+    \item 验证每个GPU都得到了$g^{(1)} + g^{(2)} + g^{(3)} = (12, 15, 18)$。
+    \item 总通信量是多少（发送数据量）？与朴素的"发到中心再广播"比较。
+\end{subproblems}
+\end{problem}
+
+%--- 变分法手算（对应第10讲）---
+\subsection*{补充编程题}
 \subsection*{第15讲：分布式优化}
 
 \begin{problem}[$\star\star$]
@@ -2069,10 +2060,53 @@ Lanczos算法核心：用$Hv$（而非完整$H$）做三对角化。每步只需
 %========================================
 %========================================
 \newpage
+\section*{附：综合题（跨章节）}
+\addcontentsline{toc}{section}{附：综合题（跨章节）}
+\setcounter{problem}{0}
+\renewcommand{\theproblem}{\arabic{problem}}
+
+\begin{problem}[综合 $\star\star\star$]
+\textbf{五条暗线追踪}。课程贯穿五条暗线：对偶、Regret、预条件、随机化、流形。请各用一段话（100字以内）总结每条暗线从第一次出现到最后一次出现的演进脉络。
+\end{problem}
+
+\begin{problem}[综合 $\star\star\star$]
+\textbf{GPU范式转变}。
+\begin{subproblems}
+    \item 列出至少4个"经典思维 vs GPU思维"的对比，并各举课程中的一个具体例子。
+    \item 在你理解中，"IO感知 $>$ FLOPS"意味着什么？用FlashAttention为例说明。
+    \item 课程认为"并行度 $>$ 复杂度"。这个观点有什么局限性？在什么情况下仍然是复杂度更重要？
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[综合 $\star\star\star$]
+\textbf{从凸到非凸到在线}。回顾课程对不同优化问题的处理方式：
+\begin{subproblems}
+    \item 凸优化（第2-3讲）：为什么凸性是"最重要的结构"？凸优化有哪些"礼物"（好的性质）？
+    \item 非凸优化（第9讲）：在深度学习中，为什么非凸问题也能被有效求解？列出三个理论解释。
+    \item 在线优化（第11-14讲）：Regret框架如何将在线学习、Bandit和RL统一起来？
+    \item 从"发现结构$\to$发展方法"的角度，总结这三类问题各自利用了什么结构。
+\end{subproblems}
+\end{problem}
+
+\begin{problem}[综合 $\star\star$]
+\textbf{从理论到实践的差距}。课程中多次强调理论最优不等于实践最优。请各举一个例子说明：
+\begin{subproblems}
+    \item 理论复杂度低但实践中慢的算法。
+    \item 理论复杂度高但在GPU上很快的算法。
+    \item 理论上有保证但实践中不使用的方法。
+    \item 理论上没有保证但实践中效果很好的方法。
+\end{subproblems}
+\end{problem}
+
+%========================================
+%========================================
+% 补充：经典手算计算题
+%========================================
+%========================================
 \section*{补充：经典深度手算题（高阶）}
 \addcontentsline{toc}{section}{补充：经典深度手算题（高阶）}
 \setcounter{problem}{0}
-\renewcommand{\theproblem}{深.\arabic{problem}}
+\renewcommand{\theproblem}{\arabic{problem}}
 
 \bigskip
 \begin{center}
@@ -2404,7 +2438,7 @@ p(z=k) = \pi_k, \quad p(x|z=k) = \mathcal{N}(x; \mu_k, 1)
 \section*{补充：开放研究思考题}
 \addcontentsline{toc}{section}{补充：开放研究思考题}
 \setcounter{problem}{0}
-\renewcommand{\theproblem}{研.\arabic{problem}}
+\renewcommand{\theproblem}{\arabic{problem}}
 
 \bigskip
 \begin{center}
